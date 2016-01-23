@@ -44,7 +44,7 @@
   * ueditor/ckeditor
 
 #Data Models
-  see **data-models-readme.rm**
+  see **data-models-readme.md**
 	
 #Evaluation
 1. ui 2 weeks
