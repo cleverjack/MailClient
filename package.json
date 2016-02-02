@@ -1,0 +1,10 @@
+{
+  "main" : "main.html",
+  "name" : "Mail Client",
+  "window" : {
+	"toolbar" : true,
+	"width" : 1200,
+    "height" : 600
+  }
+}
+
