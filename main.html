@@ -4,39 +4,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	
     <title>Mail Client</title>
     <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
 </head>
 
 <body>
-	<hr>
-	<div class="container">
-		<div class="row">
-			<div class="col-md-12">
-				<div class="btn-group" role="group" aria-label="...">
-				  <button type="button" class="btn btn-primary">写信</button>
-				  <button type="button" class="btn btn-success">收信</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="container">
-		<div class="row">
-			<div class="col-md-4">
-				
-			</div>
-			<div class="col-md-8"></div>
-		</div>
-	</div>
-	
+    <hr>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-primary">写信</button>
+                        <button type="button" class="btn btn-success">收信</button>
+                    </div>
+                    <div class="col-md-8">
+                        <!-- Single button -->
+                        <button type="button" class="btn btn-warning">删除
+                        </button>
+                        <button type="button" class="btn btn-danger">彻底删除
+                        </button>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                移动到 <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something else here</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+                <ul class="nav nav-stacked">
+                    <li role="presentation" class="active"><a href="#">收件箱<span class="badge">{{INBOX}}</span></a></li>
+                    <li role="presentation"><a href="#">发件箱<span class="badge">{{SENDBOX}}</span></a></li>
+                    <li role="presentation"><a href="#">垃圾箱<span class="badge">{{TRASH}}</span></a></li>
+                    <li role="presentation"><a href="#">草稿箱<span class="badge">{{CRAFT}}</span></a></li>
+                </ul>
+            </div>
+            <div class="col-md-10">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="container">
+                            <a href="">全选</a>
+                            <a href="">取消全选</a>
+                        </div>
+                        <hr>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item">
+                                <h4 class="list-group-item-heading">Mail Heading</h4>
+                                <p class="list-group-item-text">...</p>
+                            </a>
+                        </div>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item">
+                                <h4 class="list-group-item-heading">Mail Heading</h4>
+                                <p class="list-group-item-text">...</p>
+                            </a>
+                        </div>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item">
+                                <h4 class="list-group-item-heading">Mail Heading</h4>
+                                <p class="list-group-item-text">...</p>
+                            </a>
+                        </div>
+                        <div class="container">
+                            <nav>
+                                <ul class="pagination pagination-sm">
+                                    <li class="disabled">
+                                        <span>
+        <span aria-hidden="true">&laquo;</span>
+                                        </span>
+                                    </li>
+                                    <li>
+                                        <span>1</span>
+                                    </li>
+                                    <li class="active">
+                                        <span>2</span>
+                                    </li>
+                                    <li>
+                                        <span>3</span>
+                                    </li>
+                                    <li>
+                                        <span>4</span>
+                                    </li>
+                                    <li>
+                                        <span>5</span>
+                                    </li>
+                                    <li>
+                                        <span>6</span>
+                                    </li>
+                                    <li class="disabled">
+                                        <span>
+        <span aria-hidden="true">&raquo;</span>
+                                        </span>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>邮件概要</h3>
+                        <div class="panel panel-info">
+                        	<div class="panel-heading">
+                        		邮件标题
+                        		<a class="pull-right">详细</a>
+                        	</div>
+                            <div class="panel-body">
+                                邮件内容
+                            </div>
+                        </div>
 
-    <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript">
-    $(function() {
+                        <div class="panel panel-info">
+                        	<div class="panel-heading">
+                        		邮件标题
+                        		<a class="pull-right">详细</a>
+                        	</div>
+                            <div class="panel-body">
+                                邮件内容
+                            </div>
+                        </div>
 
-    });
-    </script>
+                        <div class="panel panel-info">
+                        	<div class="panel-heading">
+                        		邮件标题
+                        		<a class="pull-right">详细</a>
+                        	</div>
+                            <div class="panel-body">
+                                邮件内容
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+	<!-- viewModal -->
+    <div class="modal fade" id="viewModal" tabindex="-1" role="dialog">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title">邮件详情</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>One fine body&hellip;</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 </body>
+<script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="assets/js/lib//require.js"></script>
+<script type="text/javascript">
+require(['app'], function(APP) {
+    
+    APP.init();
+});
+</script>
 
 </html>
