@@ -37,5 +37,10 @@ b.readyState)return N=b}),e=N;e&&(b||(b=e.getAttribute("data-requiremodule")),g=
 
 
 require.config({
-    baseUrl : 'assets/js'
+    baseUrl : '../assets/js',
+    paths : {
+        'APP' : 'app',
+        'jquery' : 'lib/jquery.min',
+        'bootstrap' : 'lib/bootstrap.min',
+    }
 });

@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge, Chrome=1">
     <meta name="renderer" content="webkit">
     <title>Mail Client</title>
-    <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../assets/css/wangEditor.min.css">
+    <link rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
 </head>
 
 <body>
@@ -117,30 +119,28 @@
                     <div class="col-md-6">
                         <h3>邮件概要</h3>
                         <div class="panel panel-info">
-                        	<div class="panel-heading">
-                        		邮件标题
-                        		<a class="pull-right">详细</a>
-                        	</div>
+                            <div class="panel-heading">
+                                邮件标题
+                                <a class="pull-right">详细</a>
+                            </div>
                             <div class="panel-body">
                                 邮件内容
                             </div>
                         </div>
-
                         <div class="panel panel-info">
-                        	<div class="panel-heading">
-                        		邮件标题
-                        		<a class="pull-right">详细</a>
-                        	</div>
+                            <div class="panel-heading">
+                                邮件标题
+                                <a class="pull-right">详细</a>
+                            </div>
                             <div class="panel-body">
                                 邮件内容
                             </div>
                         </div>
-
                         <div class="panel panel-info">
-                        	<div class="panel-heading">
-                        		邮件标题
-                        		<a class="pull-right">详细</a>
-                        	</div>
+                            <div class="panel-heading">
+                                邮件标题
+                                <a class="pull-right">详细</a>
+                            </div>
                             <div class="panel-body">
                                 邮件内容
                             </div>
@@ -150,31 +150,38 @@
             </div>
         </div>
     </div>
-
-	<!-- viewModal -->
+    <!-- viewModal -->
     <div class="modal fade" id="viewModal" tabindex="-1" role="dialog">
-		  <div class="modal-dialog">
-		    <div class="modal-content">
-		      <div class="modal-header">
-		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-		        <h4 class="modal-title">邮件详情</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>One fine body&hellip;</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
-                    </div>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">写邮件</h4>
+                </div>
+                <div class="modal-body">
+					<form>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">收件人</label>
+                            <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">主题</label>
+                            <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                        </div>
+                    </form>
+                    <div id="toolbar"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">发送</button>
                 </div>
             </div>
         </div>
+    </div>
 </body>
-<script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
-<script type="text/javascript" src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="assets/js/lib//require.js"></script>
+<script type="text/javascript" src="../assets/js/lib/require.js"></script>
 <script type="text/javascript">
-require(['app'], function(APP) {
+require(['APP'], function(APP) {
     APP.init();
 });
 </script>

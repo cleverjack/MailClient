@@ -1,13 +1,24 @@
 ;define(function (require) {
+	
+
 	var MailApp = {
 		init : function () {
+			var $ = require('jquery');
+			require('bootstrap');
+			require('wangEditor');
 			console.log('app is initial');
 			this.bindEvents();
 		}, 
 		bindEvents : function () {
+			var $viewModal = $('#viewModal');
 			$('#writeMail').on('click', function () {
-				$('#viewModal').modal('show');
+				$viewModal.modal('show');
+
 			});
+
+			var editor = new wangEditor('toolbar');
+			editor.create();
+			console.log('wangEditor', editor);
 		}
 	};
 
