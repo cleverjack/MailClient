@@ -1,11 +1,12 @@
 ;define(function (require) {
+	var $ = require('jquery');
+	require('bootstrap');
+	require('wangEditor');
 	
 
 	var MailApp = {
 		init : function () {
-			var $ = require('jquery');
-			require('bootstrap');
-			require('wangEditor');
+			
 			console.log('app is initial');
 			this.bindEvents();
 		}, 
