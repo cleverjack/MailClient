@@ -179,30 +179,9 @@
         </div>
     </div>
 </body>
-<script type="text/javascript" src="../assets/js/lib/require.js"></script>
-<script type="text/javascript">
-require.config({
-    baseUrl : '../assets/js',
-    shim : {
-        'bootstrap' : {
-            'deps' : ['jquery'],
-            'exports' : 'bs'
-        },
-        'APP' : {
-        	'deps' : ['jquery', 'bootstrap', 'wangEditor']
-        }
-    },
-    paths : {
-        'APP' : 'app',
-        'jquery' : 'lib/jquery.min',
-        'wangEditor' : 'lib/wangEditor.min',
-        'bootstrap' : 'lib/bootstrap.min',
-    }
-});
-
-require(['APP'], function(APP) {
-    APP.init();
-});
-</script>
+<script type="text/javascript" src="../assets/js/lib/jquery.min.js"></script>
+<script type="text/javascript" src="../assets/js/lib/bootstrap.min.js"></script>
+<script type="text/javascript" src="../assets/js/lib/wangEditor.min.js"></script>
+<script type="text/javascript" src="../assets/js/app.js"></script>
 
 </html>

