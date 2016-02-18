@@ -21,6 +21,11 @@
 	};
 
 
+	/**
+	 * [sendMail 发送邮件]
+	 * @param  {[type]} data [description]
+	 * @return {[type]}      [description]
+	 */
 	function sendMail (data) {
 		var http = require('http');
 		var mailer = require('nodemailer');
