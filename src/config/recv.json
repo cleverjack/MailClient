@@ -1,0 +1,10 @@
+{
+	"qq" : {
+		protocol : "POP", // IMAP
+		account : "xxx",
+		port : 465,
+		username : "xxx",
+		password : "xxx",
+		ssl      : true
+	}
+}

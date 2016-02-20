@@ -1,0 +1,9 @@
+{
+	"qq" : {
+		protocol : "SMTP",
+		port : 465,
+		username : "xxx",
+		password : "xxx",
+		ssl      : true
+	}
+}
