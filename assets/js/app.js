@@ -34,7 +34,7 @@
 		    service:"Gmail",
 		    auth: {
 		        user: 'overkazaf@gmail.com',
-		        pass: 'xxx'
+		        pass: 'overkazaf89)!!&'
 		    }
 		});
 
