@@ -36,7 +36,7 @@
   * node-webkit
   * nodejs
   * bootstrap
-  * mongodb/mysql
+  * json file
 
 #Plugins
   * bootstrap plugins
