@@ -18,13 +18,13 @@
 
 <body>
     <hr>
-    <div class="container">
+    <div class="container step" id="addServerContainer">
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
                 <div class="panel panel-info">
                     <div class="panel-heading">
                         设置
-                        <span class="pull-right step">添加服务器</span>
+                        <span class="pull-right">添加服务器</span>
                     </div>
                     <div class="panel-body">
                         <div class="list-group">
@@ -35,17 +35,27 @@
                         </div>
                         <div class="list-group">
                             <a href="#" class="list-group-item">
+                                <h4 class="list-group-item-heading">GMail</h4>
+                                <p class="list-group-item-text">...</p>
+                            </a>
+                        </div>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item">
                                 <h4 class="list-group-item-heading">163 Mail</h4>
                                 <p class="list-group-item-text">...</p>
                             </a>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <div class="row control-btns">
+                            <button class="btn btn-primary pull-right btn-next">下一步</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <hr>
-    <div class="container">
+    <div class="container step" id="setupMailServer">
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
                 <div class="panel panel-info">
@@ -56,16 +66,16 @@
                     <div class="panel-body">
                         <form>
                             <div class="form-group">
-                                <label for="exampleInputEmail1">名称</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                                <label for="name">名称</label>
+                                <input type="text" class="form-control" id="name" placeholder="名称">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputEmail1">邮箱地址</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                                <label for="email">邮箱地址</label>
+                                <input type="email" class="form-control" id="email" placeholder="邮箱地址">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputPassword1">密码</label>
-                                <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                                <label for="password">密码</label>
+                                <input type="password" class="form-control" id="password" placeholder="密码">
                             </div>
                             <div class="checkbox">
                                 <label>
@@ -77,15 +87,16 @@
                     <div class="panel-footer">
                         <div class="row control-btns">
                             <button class="btn btn-default pull-left">代理服务器设置</button>
-                            <button class="btn btn-primary pull-right">下一步</button>
+                            <button class="btn btn-primary pull-right btn-next">下一步</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <hr>
-    <div class="container">
+
+
+    <div class="container step" id="setupSendServer">
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
                 <div class="panel panel-info">
@@ -96,20 +107,20 @@
                     <div class="panel-body">
                         <form>
                             <div class="form-group">
-                                <label for="exampleInputEmail1">SMTP服务器</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="SMTP">
+                                <label for="sendServer">SMTP服务器</label>
+                                <input type="text" class="form-control" id="sendServer" placeholder="SMTP服务器">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputEmail1">端口</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="465">
+                                <label for="port">端口</label>
+                                <input type="number" class="form-control" id="port" placeholder="465">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputEmail1">用户名</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                                <label for="sendServerUsername">用户名</label>
+                                <input type="text" class="form-control" id="sendServerUsername" placeholder="用户名">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputPassword1">密码</label>
-                                <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                                <label for="sendServerPassword">密码</label>
+                                <input type="password" class="form-control" id="sendServerPassword" placeholder="密码">
                             </div>
                             <div class="checkbox">
                                 <label>
@@ -126,15 +137,16 @@
                     <div class="panel-footer">
                         <div class="row control-btns">
                             <button class="btn btn-default pull-left">上一步</button>
-                            <button class="btn btn-primary pull-right">下一步</button>
+                            <button class="btn btn-primary pull-right btn-next">下一步</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <hr>
-    <div class="container">
+
+
+    <div class="container step" id="setupRecvServer">
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
                 <div class="panel panel-info">
@@ -146,36 +158,36 @@
                         <form>
                             <div class="form-group">
                                 <div class="dropdown">
-                                	<label for="exampleInputEmail1">服务器类型</label>
-                                    <button class="btn btn-default dropdown-toggle btn-block" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                	<label for="serverType">服务器类型</label>
+                                    <button class="btn btn-default dropdown-toggle btn-block" type="button" id="serverTypeDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                         IMAP
                                         <span class="caret"></span>
                                     </button>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                                    <ul class="dropdown-menu" aria-labelledby="serverTypeDropdown">
                                         <li><a href="#">IMAP</a></li>
                                         <li><a href="#">POP</a></li>
                                     </ul>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputEmail1">帐户</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                                <label for="account">帐户</label>
+                                <input type="text" class="form-control" id="account" placeholder="Email">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputEmail1">IMAP服务器</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                                <label for="recvServer">IMAP服务器</label>
+                                <input type="text" class="form-control" id="recvServer" placeholder="IMAP服务器">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputEmail1">端口</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="465">
+                                <label for="recvServerPort">端口</label>
+                                <input type="number" class="form-control" id="recvServerPort" placeholder="465">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputEmail1">用户名</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                                <label for="recvServerUsername">用户名</label>
+                                <input type="text" class="form-control" id="recvServerUsername" placeholder="用户名">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputPassword1">密码</label>
-                                <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                                <label for="recvServerPassword">密码</label>
+                                <input type="password" class="form-control" id="recvServerPassword" placeholder="密码">
                             </div>
                             <div class="checkbox">
                                 <label>
@@ -187,7 +199,7 @@
                     <div class="panel-footer">
                         <div class="row control-btns">
                             <button class="btn btn-default pull-left">上一步</button>
-                            <button class="btn btn-primary pull-right">下一步</button>
+                            <button class="btn btn-primary pull-right btn-next">下一步</button>
                         </div>
                     </div>
                 </div>
@@ -195,8 +207,8 @@
         </div>
     </div>
 
-    <hr>
-    <div class="container">
+
+    <div class="container step" id="testConnection">
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
                 <div class="panel panel-info">
@@ -212,13 +224,17 @@
                     <div class="panel-footer">
                         <div class="row control-btns">
                             <button class="btn btn-default pull-left">上一步</button>
-                            <button class="btn btn-primary pull-right">完成</button>
+                            <button class="btn btn-primary pull-right btn-finished">完成</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script type="text/javascript" src="../assets/js/lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../assets/js/lib/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../assets/js/proxy.js"></script>
 </body>
 
 </html>

@@ -7,10 +7,10 @@
 		bindEvents : function () {
 			var $viewModal = $('#viewModal');
 			$('#writeMail').on('click', function () {
-				// $viewModal.modal('show');
+				$viewModal.modal('show');
 
 				// test
-				sendMail();
+				//sendMail();
 
 			});
 
