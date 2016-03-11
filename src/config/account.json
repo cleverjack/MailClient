@@ -1,6 +1,6 @@
 {
 	"qq" : {
-		username : "xxx",
-		password : "xxx"
+		username : "xxx", // 邮箱用户名
+		password : "xxx"  // 邮箱密码
 	}
 }

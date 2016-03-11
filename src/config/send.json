@@ -1,9 +1,9 @@
 {
 	"qq" : {
-		protocol : "SMTP",
-		port : 465,
-		username : "xxx",
-		password : "xxx",
-		ssl      : true
+		protocol : "SMTP", // 发件服务器
+		port : 465, // 端口号
+		username : "xxx", // 用户名
+		password : "xxx", // 密码
+		ssl      : true // 是否启用安全连接
 	}
 }

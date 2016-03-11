@@ -61,6 +61,27 @@
 
 
 
+	var __defaultConfig = {
+		type : 'account',
+		path : 'account.json'
+	};
+
+	function Configure (json) {
+		var config = $.extend({}, json, __defaultConfig);
+
+		this.type = config.type;
+		this.path = config.path;
+	};
+
+	Configure.prototype = {
+		constructor : Configure,
+		save : function () {},
+		update : function () {},
+		get : function () {},
+		del : function () {}
+	};
+
+
     function init () {
     	var $steps = $('.step');
         // $steps.hide();
@@ -79,7 +100,7 @@
 
 
     /**
-     * [doNothing 空函数， 啥也不干]
+     * [doNothing 空函数， 起占位作用， 用于功能扩展]
      * @return {[type]} [description]
      */
     function doNothing () {}

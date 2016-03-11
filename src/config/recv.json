@@ -1,10 +1,10 @@
 {
 	"qq" : {
-		protocol : "POP", // IMAP
-		account : "xxx",
-		port : 465,
-		username : "xxx",
-		password : "xxx",
-		ssl      : true
+		protocol : "POP", // IMAP    收件协议
+		account : "xxx", // 帐号
+		port : 465, // 端口号
+		username : "xxx", // 用户名
+		password : "xxx", // 密码
+		ssl      : true // 是否启用安全连接
 	}
 }
