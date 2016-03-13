@@ -19,7 +19,7 @@
 		from : 'xxx@gmail.com',
 	    to: 'xxx@qq.com, yyy@qq.com',
 	    subject: 'xxx',
-	    text: 'xxx',
+	    content: 'xxx',
 	    html: '<b>Hello world 🐴</b>' // html body
 	}
 ```
