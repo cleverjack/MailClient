@@ -3,7 +3,7 @@ var POP3Client = require('poplib');
 var host = 'pop.qq.com';
 var port = 995;
 var username = '289202839@qq.com';
-var password = 'overkazaf89)!!&';
+var password = '';
 //首先建立连接
 var client = new POP3Client(port, host, {
       tlserrs: false, //是否忽略tls errors
