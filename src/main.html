@@ -30,11 +30,9 @@
                                 移动到 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a href="#">Action</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something else here</a></li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="#">Separated link</a></li>
+                                <li><a href="#">收信箱</a></li>
+                                <li><a href="#">草稿箱</a></li>
+                                <li><a href="#">垃圾箱</a></li>
                             </ul>
                         </div>
                     </div>
@@ -46,41 +44,43 @@
     <div class="container">
         <div class="row">
             <div class="col-md-2">
-                <ul class="nav nav-stacked">
-                    <li role="presentation" class="active"><a href="#">收件箱<span class="badge">{{INBOX}}</span></a></li>
-                    <li role="presentation"><a href="#">发件箱<span class="badge">{{SENDBOX}}</span></a></li>
-                    <li role="presentation"><a href="#">垃圾箱<span class="badge">{{TRASH}}</span></a></li>
-                    <li role="presentation"><a href="#">草稿箱<span class="badge">{{CRAFT}}</span></a></li>
+                <ul class="nav nav-stacked badge-list">
+                    <li role="presentation" class="active"><a href="#">收件箱 <span class="badge" data-type="INBOX">{{INBOX}}</span></a></li>
+                    <li role="presentation"><a href="#">发件箱 <span class="badge" data-type="SENDBOX">{{SENDBOX}}</span></a></li>
+                    <li role="presentation"><a href="#">垃圾箱 <span class="badge" data-type="TRASH">{{TRASH}}</span></a></li>
+                    <li role="presentation"><a href="#">草稿箱 <span class="badge" data-type="DRAFT">{{CRAFT}}</span></a></li>
                 </ul>
             </div>
             <div class="col-md-10">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="container">
-                            <a href="">全选</a>
-                            <a href="">取消全选</a>
+                            <div class="btn btn-xs btn-primary" id="selectAll">全选</div>
+                            <div class="btn btn-xs btn-default" id="cancelAll">取消全选</div>
                         </div>
                         <hr>
-                        <div class="list-group">
-                            <a href="#" class="list-group-item">
-                                <h4 class="list-group-item-heading">Mail Heading</h4>
-                                <p class="list-group-item-text">...</p>
-                            </a>
-                        </div>
-                        <div class="list-group">
-                            <a href="#" class="list-group-item">
-                                <h4 class="list-group-item-heading">Mail Heading</h4>
-                                <p class="list-group-item-text">...</p>
-                            </a>
-                        </div>
-                        <div class="list-group">
-                            <a href="#" class="list-group-item">
-                                <h4 class="list-group-item-heading">Mail Heading</h4>
-                                <p class="list-group-item-text">...</p>
-                            </a>
+                        <div class="mail-list">
+                            <div class="list-group">
+                                <a href="#" class="list-group-item">
+                                    <h4 class="list-group-item-heading">Mail Heading</h4>
+                                    <p class="list-group-item-text">...</p>
+                                </a>
+                            </div>
+                            <div class="list-group">
+                                <a href="#" class="list-group-item">
+                                    <h4 class="list-group-item-heading">Mail Heading</h4>
+                                    <p class="list-group-item-text">...</p>
+                                </a>
+                            </div>
+                            <div class="list-group">
+                                <a href="#" class="list-group-item">
+                                    <h4 class="list-group-item-heading">Mail Heading</h4>
+                                    <p class="list-group-item-text">...</p>
+                                </a>
+                            </div>
                         </div>
                         <div class="container">
-                            <nav>
+                            <!-- <nav>
                                 <ul class="pagination pagination-sm">
                                     <li class="disabled">
                                         <span>
@@ -111,36 +111,38 @@
                                         </span>
                                     </li>
                                 </ul>
-                            </nav>
+                            </nav> -->
                         </div>
                     </div>
                     <div class="col-md-6">
                         <h3>邮件概要</h3>
-                        <div class="panel panel-info">
-                            <div class="panel-heading">
-                                邮件标题
-                                <a class="pull-right">详细</a>
+                        <div class="mail-preview">
+                            <div class="panel panel-info">
+                                <div class="panel-heading">
+                                    邮件标题
+                                    <a class="pull-right">详细</a>
+                                </div>
+                                <div class="panel-body">
+                                    邮件内容
+                                </div>
                             </div>
-                            <div class="panel-body">
-                                邮件内容
+                            <div class="panel panel-info">
+                                <div class="panel-heading">
+                                    邮件标题
+                                    <a class="pull-right">详细</a>
+                                </div>
+                                <div class="panel-body">
+                                    邮件内容
+                                </div>
                             </div>
-                        </div>
-                        <div class="panel panel-info">
-                            <div class="panel-heading">
-                                邮件标题
-                                <a class="pull-right">详细</a>
-                            </div>
-                            <div class="panel-body">
-                                邮件内容
-                            </div>
-                        </div>
-                        <div class="panel panel-info">
-                            <div class="panel-heading">
-                                邮件标题
-                                <a class="pull-right">详细</a>
-                            </div>
-                            <div class="panel-body">
-                                邮件内容
+                            <div class="panel panel-info">
+                                <div class="panel-heading">
+                                    邮件标题
+                                    <a class="pull-right">详细</a>
+                                </div>
+                                <div class="panel-body">
+                                    邮件内容
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -148,8 +150,8 @@
             </div>
         </div>
     </div>
-    <!-- viewModal -->
-    <div class="modal fade" id="viewModal" tabindex="-1" role="dialog">
+    <!-- writeModal -->
+    <div class="modal fade" id="writeModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -159,19 +161,41 @@
                 <div class="modal-body">
 					<form>
                         <div class="form-group">
-                            <label for="exampleInputEmail1">收件人</label>
-                            <input type="email" class="form-control" id="exampleInputEmail1" placeholder="收件人">
+                            <label for="to">收件人</label>
+                            <input type="email" class="form-control" id="to" placeholder="收件人">
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputEmail1">主题</label>
-                            <input type="email" class="form-control" id="exampleInputEmail1" placeholder="主题">
+                            <label for="title">主题</label>
+                            <input type="email" class="form-control" id="title" placeholder="主题">
                         </div>
                     </form>
                     <div id="toolbar" style="width:400px;height:320px;"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary">发送</button>
+                    <button type="button" class="btn btn-primary send-mail">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- viewModal -->
+    <div class="modal fade" id="viewModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title mail-title">邮件标题</h4>
+                </div>
+                <div class="modal-body">
+                    <h4>发件人：<span class="mail-sender"></span></h4>
+                    <h4>发送日期：<span class="mail-date"></span></h4>
+                    <h4>邮件内容：</h4>
+                    <div class="well mail-content">
+                        
+                    </div>
                 </div>
             </div>
         </div>
