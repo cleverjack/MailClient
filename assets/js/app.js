@@ -1,4 +1,5 @@
 (function ($, wangEditor) {
+	var getMailListUrl = 'http://localhost:8081/interface.do?type=get';
 	// 配置信息
 	var CONFIG = {
 		PAGE_SIZE : 5,
@@ -6,16 +7,14 @@
 		demoData : {
 			INBOX : [
 				{
-					id : 1,
 					from : "289202839@qq.com",
 					to : "289202830@qq.com",
 					date : '2016-01-23 23:34:21',
-					title : '测试邮件标题1',
+					subject : '测试邮件标题1',
 					content : '测试邮件内容1',
 					desc : '测试邮件内容描述1'
 				},
 				{
-					id : 2,
 					from : "289202839@qq.com",
 					to : "289202830@qq.com",
 					date : '2016-01-23 23:34:22',
@@ -24,7 +23,6 @@
 					desc : '测试邮件内容描述2'
 				},
 				{
-					id : 3,
 					from : "289202839@qq.com",
 					to : "289202830@qq.com",
 					date : '2016-01-23 23:34:25',
@@ -32,7 +30,6 @@
 					content : '测试邮件内容3<br>附件是您的录用OFFER， 请查收，谢谢<br><a href="http://www.baidu.com" target="_blank">点击这里</a><br>祝你好运',
 					desc : '测试邮件内容描述3'
 				},{
-					id : 4,
 					from : "289202839@qq.com",
 					to : "289202830@qq.com",
 					date : '2016-01-23 23:34:22',
@@ -41,7 +38,6 @@
 					desc : '测试邮件内容描述4'
 				},
 				{
-					id : 5,
 					from : "289202839@qq.com",
 					to : "289202830@qq.com",
 					date : '2016-01-23 23:34:22',
@@ -51,7 +47,6 @@
 				}],
 			SENDBOX : [
 				{
-					id : 1,
 					from : "289202839@qq.com",
 					to : "289202830@qq.com",
 					date : '2016-01-23 23:34:21',
@@ -60,7 +55,6 @@
 					desc : '测试邮件内容描述1'
 				},
 				{
-					id : 2,
 					from : "289202839@qq.com",
 					to : "289202830@qq.com",
 					date : '2016-01-23 23:34:22',
@@ -70,7 +64,6 @@
 				}],
 			DRAFT : [
 				{
-					id : 1,
 					from : "289202839@qq.com",
 					to : "289202830@qq.com",
 					date : '2016-01-23 23:34:21',
@@ -79,7 +72,6 @@
 					desc : '测试邮件内容描述1'
 				},
 				{
-					id : 2,
 					from : "289202839@qq.com",
 					to : "289202830@qq.com",
 					date : '2016-01-23 23:34:22',
@@ -89,7 +81,6 @@
 				}],
 			TRASH : [
 				{
-					id : 1,
 					from : "289202839@qq.com",
 					to : "289202830@qq.com",
 					date : '2016-01-23 23:34:21',
@@ -100,6 +91,13 @@
 		}
 	};
 
+	var badgeListJson = {
+		INBOX : 9,
+		SENDBOX : 5,
+		TRASH : 2,
+		DRAFT : 7
+	};
+
 	// 邮件类型数据结构
 	var BOX_TYPE = {
 		SENDBOX : 0,
@@ -107,14 +105,16 @@
 		TRASH : 2,
 		INBOX : 3
 	};
-	var PASSWORD = 'xxxxxxxxxx'; // 测试邮件的密码， 联网测试时候再填写，不要merge这一行！
+
+	var $editor = null; // wangEditor实例
+	var PASSWORD = 'overkazaf89)!!&'; // 测试邮件的密码， 联网测试时候再填写，不要merge这一行！
 
 	function Mail () {};
 	Mail.prototype = {
 		constructor : Mail,
 		send : function (data) {
 			// 发送删除，直接调用接口
-			
+			sendMail(data);
 		},
 		del : function (id) {
 
@@ -132,10 +132,29 @@
 			// 1: draft
 			// 2: trash
 		}
-
 	};
 
 
+	function getMailList () {
+		return $.ajax({
+			url : getMailListUrl,
+			type : 'GET'
+		})
+	}
+
+	function decorationMailContents (data) {
+		return data;
+		for (var i = 0, mail; mail = data[i++];) {
+			var content  = '<br>发件日期' + mail.date;
+				content += '<br>发件人：' + mail.from;
+				content += '<br>收件人：' + mail.to;
+
+			mail.content = content;
+			mail.desc = content;
+		}
+
+		return data;
+	}
 
 
 	function MailApp (){};
@@ -143,15 +162,21 @@
 	MailApp.prototype = {
 		constructor : MailApp,
 		init : function () {
+			var that = this;
 			this.mailer = new Mail();
-			this.initMails();
-			this.bindEvents();
+
+			getMailList().done(function (data) {
+				CONFIG.demoData['INBOX'] = decorationMailContents(data);
+				badgeListJson.INBOX = data.length;
+
+				that.initMails();
+				that.bindEvents();
+			});
 
 
-			var editor = new wangEditor('toolbar');
-			editor.create();
 
-			console.log(editor);
+			$editor = new wangEditor('toolbar');
+			$editor.create();
 		}, 
 		initMails : function () {
 			initBadges();
@@ -170,10 +195,13 @@
 					$('.send-mail').on('click', function () {
 						var mailOption = constructMail($writeModal);
 
-						APP.getMailInstance().send(mailOption);
-						alert('发送中');
+						if (!mailOption) {
+							alert('请检查您的输入');
+						} else {
+							APP.getMailInstance().send(mailOption);
 
-						$writeModal.modal('hide');
+							$writeModal.modal('hide');
+						}
 					});
 				}
 			});
@@ -226,10 +254,32 @@
 	 * @return {[type]}      [description]
 	 */
 	function constructMail ($ctx) {
-		var mailTitle = $ctx.find('input[id="title"]');
-		var mailTo = $ctx.find('input[id="to"]');
-		var mailContent = 'xxxxxx'; // 由wangEditor实例返回，可能有特殊字符，过滤下
+		var $title = $ctx.find('input[id="subject"]');
+		var $to = $ctx.find('input[id="to"]');
+		var $content = $('#toolbar');
+		var mailTitle = $title.val();
+		var mailTo = $to.val();
+		var mailContent = $editor.$txt.html(); // 由wangEditor实例返回，可能有特殊字符，过滤下
 		
+		$('.error').removeClass('error');
+
+		if (!mailTo) {
+			$to.addClass('error');
+			$to.focus();
+			return null;
+		}
+
+		if (!mailTitle) {
+			$title.addClass('error');
+			$title.focus();
+			return null;
+		}
+
+		if (!$editor.$txt.text()) {
+			$('.wangEditor-container').addClass('error');
+			$content.focus();
+			return null;
+		}
 		// 最终的数据结构
 		var mailOption = {
 			title : mailTitle,
@@ -239,7 +289,6 @@
 			date : new Date()
 
 		};
-		console.log(mailOption);
 		return mailOption;
 	}
 
@@ -250,13 +299,6 @@
 	function fetchMailList () {
 		// 这里要连接服务器取得邮件信息，连接会因为网络的原因搞得太麻烦
 		// 后台先用node接口/或静态数据模拟，最后拼装
-		
-		var badgeListJson = {
-			INBOX : 9,
-			SENDBOX : 5,
-			TRASH : 2,
-			DRAFT : 7
-		};
 		
 		return badgeListJson
 	}
@@ -285,7 +327,10 @@
 		var tpl = '';
 		for (var i = 0, mail; mail = list[i++];) {
 			var str = mailTpl();
-			str = str.replace(/{{TITLE}}/g, mail.title);
+			var subject = mail.subject.join(',');
+
+			subject = subject.length < 20 ? subject : subject.substring(0, 20) + '...';
+			str = str.replace(/{{SUBJECT}}/g, subject);
 			str = str.replace(/{{DESC}}/g, mail.desc);
 			tpl += str;
 		}
@@ -306,8 +351,10 @@
 		var tpl = '';
 		for (var i = 0, mail; i < CONFIG.LIMIT && (mail = list[i++]);) {
 			var str = mailPreviewTpl();
-			str = str.replace(/{{TITLE}}/g, mail.title);
-			str = str.replace(/{{ID}}/g, mail.id);
+			var subject = mail.subject.join(',');
+
+			subject = subject.length < 20 ? subject : subject.substring(0, 20) + '...';
+			str = str.replace(/{{SUBJECT}}/g, subject);
 			str = str.replace(/{{CONTENT}}/g, mail.content);
 			tpl += str;
 		}
@@ -345,7 +392,7 @@
 	 * @return {[type]} [description]
 	 */
 	function loadMail (mail, $context) {
-		$context.find('.mail-title').text(mail.title);
+		$context.find('.mail-subject').text(mail.title);
 		$context.find('.mail-sender').text(mail.from);
 		$context.find('.mail-date').text(mail.date);
 		$context.find('.mail-content').html(mail.content);
@@ -357,34 +404,8 @@
 	 * @return {[type]}      [description]
 	 */
 	function sendMail (data) {
-		var http = require('http');
-		var mailer = require('nodemailer');
+		
 
-		var transporter = mailer.createTransport("SMTP", {
-		    service:"Gmail",
-		    auth: {
-		        user: 'overkazaf@gmail.com',
-		        pass: PASSWORD
-		    }
-		});
-
-		var json = {
-			test : 'hello'
-		};
-
-		var mail = {
-			from : 'overkazaf@gmail.com',
-		    to: '289202839@qq.com',
-		    subject: 'new victim is online',
-		    text: 'new chicken - >' + JSON.stringify(json)
-		};
-		transporter.sendMail(mail, function(error, response){
-		   if(error){
-		       console.log(error);
-		   }else{
-		       console.log("Message sent: " + response.message);
-		   }
-		});
 	}
 
 
@@ -396,7 +417,7 @@
 	function mailPreviewTpl () {
 		var tpl = '<div class="panel panel-info"> \
                     <div class="panel-heading"> \
-                        {{TITLE}} \
+                        {{SUBJECT}} \
                         <a class="pull-right mail-detail" data-id="{{ID}}">详细</a> \
                     </div> \
                     <div class="panel-body"> \
@@ -413,7 +434,7 @@
 	function mailTpl () {
 		var tpl = '<div class="list-group"> \
                         <a href="#" class="list-group-item"> \
-                            <h4 class="list-group-item-heading">{{TITLE}}</h4> \
+                            <h4 class="list-group-item-heading">{{SUBJECT}}</h4> \
                             <p class="list-group-item-text">{{DESC}}</p> \
                         </a> \
                     </div>';

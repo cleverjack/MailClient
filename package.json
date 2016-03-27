@@ -2,9 +2,9 @@
   "main": "src/main.html",
   "name": "Mail Client",
   "window": {
-    "toolbar": false,
+    "toolbar": true,
     "width": 1200,
-    "height": 600
+    "height": 800
   },
   "devDependencies": {
     "http": "0.0.0"
