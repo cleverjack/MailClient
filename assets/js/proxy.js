@@ -94,7 +94,7 @@
 		},
 		setupRecvServer : function ($ctx) {
 			var $protocol = $ctx.find('.dropdown-target:first');
-			var $account = $ctx.find('input[id="account"]');
+			// var $account = $ctx.find('input[id="account"]');
 			var $host = $ctx.find('input[id="recvServer"]');
 			var $port = $ctx.find('input[id="recvServerPort"]');
 			var $user = $ctx.find('input[id="recvServerUsername"]');

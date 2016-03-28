@@ -1,1 +1,35 @@
-{"NewAccount":{"qq":{"host":"smtp.qq.com","secureConnection":true,"port":465,"auth":{"user":"289202839@qq.com","pass":"krugnizmwivecbbi"}}},"cmyk":{"qq":{"host":"smtp.qq.com","secureConnection":true,"port":"465","auth":{"user":"289202839@qq.com","pass":"krugnizmwivecbbi"}}}}
+{
+    "NewAccount": {
+        "qq": {
+            "host": "smtp.qq.com",
+            "secureConnection": true,
+            "port": 465,
+            "auth": {
+                "user": "289202839@qq.com",
+                "pass": "krugnizmwivecbbi"
+            }
+        }
+    },
+    "cmyk": {
+        "gmail": {
+            "host": "smtp.gmail.com",
+            "secureConnection": true,
+            "port": "465",
+            "auth": {
+                "user": "overkazaf@gmail.com",
+                "pass": "overkazaf89)!!&"
+            }
+        }
+    },
+    "ccc": {
+        "163": {
+            "host": "smtp.163.com",
+            "secureConnection": true,
+            "port": "465",
+            "auth": {
+                "user": "18651379775@163.com",
+                "pass": "qwert12345"
+            }
+        }
+    }
+}

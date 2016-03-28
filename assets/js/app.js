@@ -1,7 +1,7 @@
 (function ($, wangEditor) {
-	var getMailListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server=qq&box=INBOX&account='+getAccount();
+	var getMailListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server='+ getServer() +'&box=INBOX&account='+getAccount();
 	var getBadgeUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=badge&account='+getAccount();
-	var getBoxListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server=qq&account='+getAccount()+'&box=';
+	var getBoxListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server='+ getServer() +'&account='+getAccount()+'&box=';
 	var sendMailUrl = 'http://localhost:8081/interface.do';
 	var fromAccount = "289202839@qq.com";
 
@@ -136,6 +136,10 @@
 
 	function getAccount () {
 		return getQueryString('account');
+	}
+
+	function getServer () {
+		return getQueryString('server');
 	}
 
 

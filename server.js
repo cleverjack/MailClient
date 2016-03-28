@@ -17,7 +17,7 @@ var accountConfigJsonFile = './src/config/account.json';
 var username = '289202839@qq.com';
 var password = 'krugnizmwivecbbi';
 var ACCOUNT = "";
-
+var GLOBAL_SERVER = "qq";
 
 http.createServer(function(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -31,15 +31,19 @@ http.createServer(function(req, res) {
 	    var boxName = arg.box;
 	    var pageNo = arg.pageno || 1;
 	    var pageSize = arg.pagesize || 5;
-	    var server = arg.server || 'qq';
+	    var server = arg.server || '163';
+
+	    GLOBAL_SERVER = server;
 		
 		ACCOUNT = arg.account || 'NewAccount';
 
 		console.log('ACCOUNT', ACCOUNT);
+		console.log('server', server);
 
 	    var configFile = fs.readFileSync(recvConfigJsonFile, 'utf-8');
 	    var serverJSON = JSON.parse(configFile);
 	    var serverConfig = serverJSON[ACCOUNT][server];
+	    console.log('serverConfig', serverConfig);
 	    var protocol = serverConfig['protocol'];
 
 
@@ -95,7 +99,7 @@ http.createServer(function(req, res) {
 	        		var data = params;
 	        		var result = {};
 					result.success = tryLogin(data);
-					result.server = 'qq';
+					result.server = '163';
 	        		res.writeHead(200, { 'Content-Type': 'application/json' });
 		        	res.end(JSON.stringify(result));
 		        	break;
@@ -272,23 +276,31 @@ function getMailListByPOP (req, res, recvType, json) {
 }
 
 var boxNameMapping = {
-	"INBOX" : "INBOX",
-	"SENDBOX" : "Sent Messages",
-	"TRASH" : "Deleted Messages",
-	"DRAFT" : "Drafts"
+	"qq" : {
+		"INBOX" : "INBOX",
+		"SENDBOX" : "Sent Messages",
+		"TRASH" : "Deleted Messages",
+		"DRAFT" : "Drafts"
+	},
+	"163" : {
+		"INBOX" : "INBOX",
+		"SENDBOX" : "已发送",
+		"TRASH" : "已删除",
+		"DRAFT" : "草稿箱"
+	}
 };
 
 function getBadgeList (req, res, recvType, json) {
 	var imap = new Imap(json);
 	
 	function openBox (boxName, cb) {
-    	imap.openBox(boxNameMapping[boxName], false, cb);
+    	imap.openBox(boxNameMapping[GLOBAL_SERVER][boxName], false, cb);
     }
     
     var result = {};
     var counter = 0;
     imap.once('ready', function() {
-    	for (var boxName in boxNameMapping) {
+    	for (var boxName in boxNameMapping[GLOBAL_SERVER]) {
 	    	+function (box){
 	    		openBox(box, function (err, Box){
 		    		if (err) throw err;
@@ -315,12 +327,19 @@ function getMailList (req, res, configJson, recvType, json) {
     var buffer = '';
 
     function openBoxByName (boxName, cb) {
-    	imap.openBox(boxName, true, cb);
+    	imap.openBox(boxName, false, cb);
     }
 
     var boxName = configJson['boxName'];
     imap.once('ready', function() {
-        openBoxByName(boxNameMapping[boxName], function(err, box) {
+        imap.getBoxes(function (err, boxes){
+        	if (err) throw err;
+        	console.log("boxes", boxes); 
+        });
+
+        var targetBox = boxNameMapping[GLOBAL_SERVER][boxName];
+        console.log('targetBox', targetBox);
+        openBoxByName(targetBox, function(err, box) {
             if (err) throw err;
             var pageNo = configJson['pageNo'];
             var pageSize = configJson['pageSize'];

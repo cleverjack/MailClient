@@ -1,1 +1,38 @@
-{"NewAccount":{"qq":{"protocol":"IMAP","server":{"user":"289202839@qq.com","password":"krugnizmwivecbbi","host":"imap.qq.com","port":993,"tls":true}}},"cmyk":{"qq":{"protocol":"IMAP","server":{"user":"289202839@qq.com","password":"krugnizmwivecbbi","host":"imap.qq.com","port":"993","tls":true}}}}
+{
+    "NewAccount": {
+        "qq": {
+            "protocol": "IMAP",
+            "server": {
+                "user": "289202839@qq.com",
+                "password": "krugnizmwivecbbi",
+                "host": "imap.qq.com",
+                "port": 993,
+                "tls": true
+            }
+        }
+    },
+    "cmyk": {
+        "gmail": {
+            "protocol": "IMAP",
+            "server": {
+                "user": "overkazaf@gmail.com",
+                "password": "overkazaf89)!!&",
+                "host": "imap.gmail.com",
+                "port": "993",
+                "tls": true
+            }
+        }
+    },
+    "ccc": {
+        "163": {
+            "protocol": "IMAP",
+            "server": {
+                "user": "18651379775@163.com",
+                "password": "qwert12345",
+                "host": "imap.163.com",
+                "port": "993",
+                "tls": true
+            }
+        }
+    }
+}
