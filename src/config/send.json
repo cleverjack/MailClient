@@ -1,9 +1,11 @@
 {
-	"qq" : {
-		protocol : "SMTP", // 发件服务器
-		port : 465, // 端口号
-		username : "xxx", // 用户名
-		password : "xxx", // 密码
-		ssl      : true // 是否启用安全连接
-	}
+    "qq": {
+        "host": "smtp.qq.com",
+        "secureConnection": true,
+        "port": 465,
+        "auth": {
+            "user": "289202839@qq.com",
+            "pass": "krugnizmwivecbbi"
+        }
+    }
 }

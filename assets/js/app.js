@@ -1,5 +1,10 @@
 (function ($, wangEditor) {
-	var getMailListUrl = 'http://localhost:8081/interface.do?type=get';
+	var getMailListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server=qq&box=INBOX';
+	var getBadgeUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=badge';
+	var getBoxListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server=qq&box=';
+	var sendMailUrl = 'http://localhost:8081/interface.do';
+	var fromAccount = "289202839@qq.com";
+
 	// 配置信息
 	var CONFIG = {
 		PAGE_SIZE : 5,
@@ -91,13 +96,6 @@
 		}
 	};
 
-	var badgeListJson = {
-		INBOX : 9,
-		SENDBOX : 5,
-		TRASH : 2,
-		DRAFT : 7
-	};
-
 	// 邮件类型数据结构
 	var BOX_TYPE = {
 		SENDBOX : 0,
@@ -107,7 +105,7 @@
 	};
 
 	var $editor = null; // wangEditor实例
-	var PASSWORD = 'overkazaf89)!!&'; // 测试邮件的密码， 联网测试时候再填写，不要merge这一行！
+	var PASSWORD = 'vvvxxx'; // 测试邮件的密码， 联网测试时候再填写，不要merge这一行！
 
 	function Mail () {};
 	Mail.prototype = {
@@ -143,16 +141,21 @@
 	}
 
 	function decorationMailContents (data) {
-		return data;
 		for (var i = 0, mail; mail = data[i++];) {
-			var content  = '<br>发件日期' + mail.date;
+			var content  = '日期：' + mail.date;
 				content += '<br>发件人：' + mail.from;
 				content += '<br>收件人：' + mail.to;
+				content += '<br>主题：'  + mail.subject;
 
 			mail.content = content;
 			mail.desc = content;
 		}
 
+		// if (data.length) {
+		// 	data.sort(function (a, b) {
+		// 		return (+ new Date(a.date)) - (+ new Date(b.date));
+		// 	});
+		// }
 		return data;
 	}
 
@@ -165,25 +168,34 @@
 			var that = this;
 			this.mailer = new Mail();
 
-			getMailList().done(function (data) {
-				CONFIG.demoData['INBOX'] = decorationMailContents(data);
-				badgeListJson.INBOX = data.length;
-
-				that.initMails();
+			
+			$('#statusAlert').fadeIn('slow');
+			initBadges();
+			this.initBox('INBOX', function () {
 				that.bindEvents();
+				$('#statusAlert').fadeOut('slow');
 			});
-
-
 
 			$editor = new wangEditor('toolbar');
 			$editor.create();
 		}, 
-		initMails : function () {
-			initBadges();
-			initMailList(CONFIG.demoData.INBOX, BOX_TYPE.INBOX, 1, CONFIG.PAGE_SIZE);
-			initMailPreview(CONFIG.demoData.INBOX, BOX_TYPE.INBOX, 1, CONFIG.PAGE_SIZE, 3);
+		initBox : function (boxName, callback) {
+			var boxUrl = getBoxListUrl + boxName;
+			$.ajax({
+				url : boxUrl,
+				cache : false,
+				type : 'GET',
+				success : function (list) {
+					CONFIG.demoData[boxName] = decorationMailContents(list);
+					initMailList(CONFIG.demoData[boxName], BOX_TYPE[boxName], 1, CONFIG.PAGE_SIZE);
+					initMailPreview(CONFIG.demoData[boxName], BOX_TYPE[boxName], 1, CONFIG.PAGE_SIZE, 3);
+				}
+			}).done(function () {
+				callback && callback();
+			});
 		},
 		bindEvents : function () {
+			var that = this;
 			var $writeModal = $('#writeModal');
 			$('#writeMail').on('click', function () {
 				$writeModal.modal('show');
@@ -204,6 +216,18 @@
 						}
 					});
 				}
+			});
+
+			$('#recvMail').on('click', function () {
+				$('#statusAlert').fadeIn('slow');
+				$('.main-body').hide();
+
+
+				initBadges();
+				that.initBox('INBOX', function () {
+					$('#statusAlert').fadeOut('slow');
+					$('.main-body').fadeIn('slow');
+				});
 			});
 
 			var $viewModal = $('#viewModal');
@@ -235,11 +259,14 @@
 			$('.badge-list').on('click', 'li', function (ev) {
 				var $current = $(ev.currentTarget);
 				var currentType = $current.find('span').attr('data-type');
-				$('.badge-list>li').removeClass('active');
-				$current.addClass('active');
-
-				initMailList(CONFIG.demoData[currentType], BOX_TYPE[currentType], 1, CONFIG.PAGE_SIZE);
-				initMailPreview(CONFIG.demoData[currentType], BOX_TYPE[currentType], 1, CONFIG.PAGE_SIZE, 3);
+				if (!$current.hasClass('active')) {
+					$('.badge-list>li').removeClass('active');
+					$current.addClass('active');
+					$('#statusAlert').fadeIn('slow');
+					that.initBox(currentType, function () {
+						$('#statusAlert').fadeOut('slow');
+					});
+				}
 			});
 
 		},
@@ -282,12 +309,11 @@
 		}
 		// 最终的数据结构
 		var mailOption = {
-			title : mailTitle,
-			from : '289202839@qq.com',
+			subject : mailTitle,
+			from : fromAccount,
 			to : mailTo,
 			content : mailContent,
 			date : new Date()
-
 		};
 		return mailOption;
 	}
@@ -304,13 +330,18 @@
 	}
 
 	function initBadges () {
-		var dataList = fetchMailList();
-
-		var $badgeList = $('.badge-list');
-		$badgeList.find('.badge[data-type="INBOX"]').text(dataList.INBOX);
-		$badgeList.find('.badge[data-type="SENDBOX"]').text(dataList.SENDBOX);
-		$badgeList.find('.badge[data-type="TRASH"]').text(dataList.TRASH);
-		$badgeList.find('.badge[data-type="DRAFT"]').text(dataList.DRAFT);
+		$.ajax({
+			url : getBadgeUrl,
+			type : "GET",
+			cache : false,
+			success : function (data) {
+				var $badgeList = $('.badge-list');
+				$badgeList.find('.badge[data-type="INBOX"]').text(data.INBOX.total);
+				$badgeList.find('.badge[data-type="SENDBOX"]').text(data.SENDBOX.total);
+				$badgeList.find('.badge[data-type="TRASH"]').text(data.TRASH.total);
+				$badgeList.find('.badge[data-type="DRAFT"]').text(data.DRAFT.total);
+			}
+		});
 	}
 
 
@@ -327,11 +358,12 @@
 		var tpl = '';
 		for (var i = 0, mail; mail = list[i++];) {
 			var str = mailTpl();
-			var subject = mail.subject.join(',');
+			var subject = mail.subject;
+			subject = !!subject ? subject.join(',') : 'Unknown mail';
 
 			subject = subject.length < 20 ? subject : subject.substring(0, 20) + '...';
+			str = str.replace(/{{FROM}}/g, mail.from ? mail.from : "Unknown");
 			str = str.replace(/{{SUBJECT}}/g, subject);
-			str = str.replace(/{{DESC}}/g, mail.desc);
 			tpl += str;
 		}
 		$container.html(tpl);
@@ -351,11 +383,12 @@
 		var tpl = '';
 		for (var i = 0, mail; i < CONFIG.LIMIT && (mail = list[i++]);) {
 			var str = mailPreviewTpl();
-			var subject = mail.subject.join(',');
+			var subject = mail.subject && mail.subject.join(',') || 'Unknown';
 
 			subject = subject.length < 20 ? subject : subject.substring(0, 20) + '...';
 			str = str.replace(/{{SUBJECT}}/g, subject);
 			str = str.replace(/{{CONTENT}}/g, mail.content);
+			str = str.replace(/{{MAILID}}/g, mail.id);
 			tpl += str;
 		}
 		$container.html(tpl);
@@ -392,10 +425,23 @@
 	 * @return {[type]} [description]
 	 */
 	function loadMail (mail, $context) {
-		$context.find('.mail-subject').text(mail.title);
+		$context.find('.mail-subject').text(mail.subject);
 		$context.find('.mail-sender').text(mail.from);
 		$context.find('.mail-date').text(mail.date);
-		$context.find('.mail-content').html(mail.content);
+
+		var $iframe = $('<iframe>').attr({
+			src: 'http://localhost:8080/' + mail.path,
+			frameBorder : '0',
+			marginWidth : 0,
+			marginHeight : 0,
+			width: '100%',
+			height: '100%',
+			style: 'width: 100%; height: 100%;'
+		}).css({
+			width: '100%',
+			height: '100%'
+		});
+		$context.find('.mail-content').html($iframe);
 	}
 
 	/**
@@ -404,7 +450,18 @@
 	 * @return {[type]}      [description]
 	 */
 	function sendMail (data) {
-		
+		$.ajax({
+			url : sendMailUrl,
+			type : 'POST',
+			data : data,
+			success : function (info) {
+				if (info.success == true || info.success == 'true') {
+					alert('邮件已经成功发送！\r\n'+info.message);
+				} else {
+					alert('邮件发送失败！\r\n错误原因：'+info.message);
+				}
+			}
+		});
 
 	}
 
@@ -418,7 +475,7 @@
 		var tpl = '<div class="panel panel-info"> \
                     <div class="panel-heading"> \
                         {{SUBJECT}} \
-                        <a class="pull-right mail-detail" data-id="{{ID}}">详细</a> \
+                        <a class="pull-right mail-detail" data-id="{{MAILID}}">详细</a> \
                     </div> \
                     <div class="panel-body"> \
                         {{CONTENT}} \
@@ -434,8 +491,8 @@
 	function mailTpl () {
 		var tpl = '<div class="list-group"> \
                         <a href="#" class="list-group-item"> \
-                            <h4 class="list-group-item-heading">{{SUBJECT}}</h4> \
-                            <p class="list-group-item-text">{{DESC}}</p> \
+                            <h4 class="list-group-item-heading">{{FROM}}</h4> \
+                            <p class="list-group-item-text">{{SUBJECT}}</p> \
                         </a> \
                     </div>';
         return tpl;

@@ -12,10 +12,20 @@
         .error {
             border: 1px solid #f00;
         }
+        .mail-content {
+            height: 500px;
+        }
     </style>
 </head>
 <body>
-    <hr>
+    <div id="statusAlert" class="alert alert-warning">
+       <a href="#" class="close" data-dismiss="alert">&times;</a>
+       <center>
+           <strong>正在获取服务端数据，请稍等...</strong>
+       </center>
+    </div>
+    <div class="main">
+        <hr>
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -25,7 +35,6 @@
                         <button type="button" id="recvMail" class="btn btn-success">收信</button>
                     </div>
                     <div class="col-md-8">
-                        <!-- Single button -->
                         <button type="button" class="btn btn-warning">删除
                         </button>
                         <button type="button" class="btn btn-danger">彻底删除
@@ -46,7 +55,7 @@
         </div>
     </div>
     <hr>
-    <div class="container">
+    <div class="container main-body">
         <div class="row">
             <div class="col-md-2">
                 <ul class="nav nav-stacked badge-list">
@@ -85,17 +94,17 @@
                             </div>
                         </div>
                         <div class="container">
-                            <!-- <nav>
+                            <nav>
                                 <ul class="pagination pagination-sm">
                                     <li class="disabled">
                                         <span>
         <span aria-hidden="true">&laquo;</span>
                                         </span>
                                     </li>
-                                    <li>
+                                    <li class="active">
                                         <span>1</span>
                                     </li>
-                                    <li class="active">
+                                    <li>
                                         <span>2</span>
                                     </li>
                                     <li>
@@ -116,7 +125,7 @@
                                         </span>
                                     </li>
                                 </ul>
-                            </nav> -->
+                            </nav>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -155,6 +164,7 @@
             </div>
         </div>
     </div>
+    </div>
     <!-- writeModal -->
     <div class="modal fade" id="writeModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg">
@@ -174,7 +184,7 @@
                             <input type="email" class="form-control" id="subject" placeholder="主题">
                         </div>
                     </form>
-                    <div id="toolbar" style="width:400px;height:320px;"></div>
+                    <div id="toolbar" style="width:100%;height:320px;"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
@@ -192,11 +202,11 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title mail-subject">邮件标题</h4>
+                    <h4 class="modal-title mail-subject">{{SUBJECT}}</h4>
                 </div>
                 <div class="modal-body">
-                    <h4>发件人：<span class="mail-sender"></span></h4>
-                    <h4>发送日期：<span class="mail-date"></span></h4>
+                    <h4>发件人：<span class="mail-sender">{{FROM}}</span></h4>
+                    <h4>发送日期：<span class="mail-date">{{DATE}}</span></h4>
                     <h4>邮件内容：</h4>
                     <div class="well mail-content">
                         

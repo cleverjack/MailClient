@@ -1,10 +1,22 @@
 {
-	"qq" : {
-		protocol : "POP", // IMAP    收件协议
-		account : "xxx", // 帐号
-		port : 465, // 端口号
-		username : "xxx", // 用户名
-		password : "xxx", // 密码
-		ssl      : true // 是否启用安全连接
-	}
+    "qq": {
+        "protocol": "IMAP",
+        "server" : {
+            "user": "289202839@qq.com",
+            "password": "krugnizmwivecbbi",
+            "host": "imap.qq.com",
+            "port": 993,
+            "tls": true
+        }
+    },
+    "gmail" : {
+    	"protocol": "IMAP",
+    	"server" : {
+    		"user": "overkazaf@gmail.com",
+	        "password": "overkazaf89)!!&",
+	        "host": "imap.gmail.com",
+	        "port": 993,
+	        "tls": true
+    	}
+    } 
 }
