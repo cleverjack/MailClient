@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="../assets/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="../assets/css/app.css">
+
 </head>
 
 <body>
@@ -60,8 +61,8 @@
                     <div class="panel-body">
                         <form>
                             <div class="form-group">
-                                <label for="name">名称</label>
-                                <input type="text" class="form-control" id="name" placeholder="名称">
+                                <label for="name">帐户</label>
+                                <input type="text" class="form-control" id="name" placeholder="帐户">
                             </div>
                             <div class="form-group">
                                 <label for="email">邮箱地址</label>
@@ -118,7 +119,7 @@
                             </div>
                             <div class="checkbox">
                                 <label>
-                                    <input type="checkbox"> 安全连接
+                                    <input id="secureConnection" type="checkbox"> 安全连接
                                 </label>
                             </div>
                             <div class="checkbox">
@@ -173,7 +174,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="recvServerPort">端口</label>
-                                <input type="number" class="form-control" id="recvServerPort" placeholder="465">
+                                <input type="number" class="form-control" id="recvServerPort" placeholder="993">
                             </div>
                             <div class="form-group">
                                 <label for="recvServerUsername">用户名</label>
@@ -185,7 +186,7 @@
                             </div>
                             <div class="checkbox">
                                 <label>
-                                    <input type="checkbox"> 安全连接
+                                    <input id="tls" type="checkbox"> 安全连接
                                 </label>
                             </div>
                         </form>
@@ -220,6 +221,41 @@
                             <button class="btn btn-default pull-left btn-prev">上一步</button>
                             <button class="btn btn-primary pull-right btn-next">完成</button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">已存在帐户？</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="loginUser">帐户</label>
+                            <input type="text" class="form-control" id="loginUser" placeholder="用户名">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPass">密码</label>
+                            <input type="password" class="form-control" id="loginPass" placeholder="密码">
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input id="loginRemember" type="checkbox"> 记住密码
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="row control-btns">
+                        <button class="btn btn-default" id="cancelLogin">取消</button>
+                        <button class="btn btn-primary" id="login">登陆</button>
                     </div>
                 </div>
             </div>

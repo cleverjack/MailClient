@@ -1,11 +1,1 @@
-{
-    "qq": {
-        "host": "smtp.qq.com",
-        "secureConnection": true,
-        "port": 465,
-        "auth": {
-            "user": "289202839@qq.com",
-            "pass": "krugnizmwivecbbi"
-        }
-    }
-}
+{"NewAccount":{"qq":{"host":"smtp.qq.com","secureConnection":true,"port":465,"auth":{"user":"289202839@qq.com","pass":"krugnizmwivecbbi"}}},"cmyk":{"qq":{"host":"smtp.qq.com","secureConnection":true,"port":"465","auth":{"user":"289202839@qq.com","pass":"krugnizmwivecbbi"}}}}

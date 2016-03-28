@@ -5,13 +5,19 @@ var Imap = require('imap'); // IMAP协议模块
 var POP3Client = require('poplib'); // POP协议模块
 var inspect = require('util').inspect;
 var fs = require('fs');
-var serverConfigFile = './src/config/recv.json';
-var sendServerConfigFile = './src/config/send.json';
 var MailParser = require('mailparser').MailParser;
 var querystring = require('querystring');
 
+
+/* 文件路径 */
+var recvConfigJsonFile = './src/config/recv.json';
+var sendConfigJsonFile = './src/config/send.json';
+var accountConfigJsonFile = './src/config/account.json';
+
 var username = '289202839@qq.com';
 var password = 'krugnizmwivecbbi';
+var ACCOUNT = "";
+
 
 http.createServer(function(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -26,26 +32,33 @@ http.createServer(function(req, res) {
 	    var pageNo = arg.pageno || 1;
 	    var pageSize = arg.pagesize || 5;
 	    var server = arg.server || 'qq';
+		
+		ACCOUNT = arg.account || 'NewAccount';
 
-	    var configFile = fs.readFileSync(serverConfigFile, 'utf-8');
+		console.log('ACCOUNT', ACCOUNT);
+
+	    var configFile = fs.readFileSync(recvConfigJsonFile, 'utf-8');
 	    var serverJSON = JSON.parse(configFile);
-	    var serverConfig = serverJSON[server];
+	    var serverConfig = serverJSON[ACCOUNT][server];
 	    var protocol = serverConfig['protocol'];
 
 
-	    if (protocol == 'IMAP') {
-        	if (action == 'mail') {
+	    if (action == 'mail') {
+	    	if (protocol == 'IMAP') {
         		getMailList(req, res, {
-        			'boxName' : boxName || 'INBOX',
-        			'pageNo' : pageNo,
-        			'pageSize' : pageSize
-        		}, 'IMAP', serverConfig.server);
-        	} else if (action == 'badge'){
-        		getBadgeList(req, res, 'IMAP', serverConfig.server);
-        	}
-        } else if (protocol == 'POP') {
-        	getMailListByPOP(req, res)
-        }
+	    			'boxName' : boxName || 'INBOX',
+	    			'pageNo' : pageNo,
+	    			'pageSize' : pageSize
+	    		}, 'IMAP', serverConfig.server);
+
+	        } else if (protocol == 'POP') {
+	        	getMailListByPOP(req, res)
+	        }
+    		
+    	} else if (action == 'badge'){
+    		getBadgeList(req, res, 'IMAP', serverConfig.server);
+    	}
+	    
 	    
     } else {
     	var postData = ""; //POST & GET ： name=zzl&email=zzl@sina.com
@@ -55,15 +68,143 @@ http.createServer(function(req, res) {
 	    });
 	    // 数据接收完毕，执行回调函数
 	    req.addListener("end", function () {
-	        console.log('数据接收完毕');
 	        var params = querystring.parse(postData);
-	        console.log('params', params);
-	        sendMail(req, res, params);
+	        ACCOUNT = params.account || 'NewAccount';
+
+	        switch (params.action) {
+	        	case "SEND":
+	        		sendMail(req, res, params);
+	        		break;
+	        	case "CONFIG":
+	        		var data = params;
+	        		var a = setAccount(req, res, data);
+	        		var b = setSend(req, res, data);
+	        		var c = setRecv(req, res, data);
+	        		var result = {};
+
+	        		if (a && b && c) {
+	        			result.success = true;	
+	        		} else {
+	        			result.success = false;
+	        		}
+
+	        		res.writeHead(200, { 'Content-Type': 'application/json' });
+		        	res.end(JSON.stringify(result));
+	        		break;
+	        	case "LOGIN":
+	        		var data = params;
+	        		var result = {};
+					result.success = tryLogin(data);
+					result.server = 'qq';
+	        		res.writeHead(200, { 'Content-Type': 'application/json' });
+		        	res.end(JSON.stringify(result));
+		        	break;
+	        }
 	    });
     }
-
     
 }).listen(8081);
+
+/**
+ * [tryLogin description]
+ * @param  {[type]} json [{account:xxx,email:xxx,password}]
+ * @return {[type]}      [description]
+ */
+function tryLogin (json) {
+	var accountJsonFile = fs.readFileSync(accountConfigJsonFile, 'utf-8');
+	var accountJson = JSON.parse(accountJsonFile);
+	var flag = false;
+	for (var account in accountJson) {
+		if (account == json['account']) {
+			var potential = accountJson[account];
+			if (potential.password == json['password']) {
+				flag = true;
+				break;
+			}
+			
+		}
+	}
+
+	return flag;
+}
+
+/**
+ * [setAccount 设置帐户]
+ * @param {[type]} req  [请求对象]
+ * @param {[type]} res  [响应对象]
+ * @param {[type]} data [设置的参数]
+ */
+function setAccount (req, res, data) {
+	var config = fs.readFileSync(accountConfigJsonFile, 'utf-8');
+	var configJson = JSON.parse(config);
+
+	var info = JSON.parse(data.data);
+
+	console.log('info', info);
+	console.log('info.account', info.account);
+
+	var cloned = clone(configJson);
+	var extraInfo = info.accountInfo;
+	console.log('extraInfo', extraInfo);
+
+	cloned[info.account] = {
+		"email" : extraInfo.email,
+		"password" : extraInfo.password,
+		"remember" : extraInfo.remember
+	};
+
+	console.log('cloned', cloned);
+
+	fs.writeFileSync(accountConfigJsonFile, JSON.stringify(cloned), 'utf-8');
+
+	return true;
+}
+
+/**
+ * [setSend 设置发件服务器]
+ * @param {[type]} req  [请求对象]
+ * @param {[type]} res  [响应对象]
+ * @param {[type]} data [设置的参数]
+ */
+function setSend (req, res, data) {
+	var config = fs.readFileSync(sendConfigJsonFile, 'utf-8');
+	var configJson = JSON.parse(config);
+
+	var info = JSON.parse(data.data);
+	console.log('info in send', info);
+	var cloned = clone(configJson);
+	var append = clone(info['send']);
+	cloned[info.account] = {};
+	cloned[info.account][info.server] = append;
+
+	fs.writeFileSync(sendConfigJsonFile, JSON.stringify(cloned), 'utf-8');
+	return true;
+}
+
+
+/**
+ * [setRecv 设置收件服务器]
+ * @param {[type]} req  [请求对象]
+ * @param {[type]} res  [响应对象]
+ * @param {[type]} data [设置的参数]
+ */
+function setRecv (req, res, data) {
+	var config = fs.readFileSync(recvConfigJsonFile, 'utf-8');
+	var configJson = JSON.parse(config);
+	
+	var info = JSON.parse(data.data);
+	console.log('info in recv', info);
+	var cloned = clone(configJson);
+	var append = clone(info['recv']);
+	cloned[info.account] = {};
+	cloned[info.account][info.server] = append;
+
+	fs.writeFileSync(recvConfigJsonFile, JSON.stringify(cloned), 'utf-8');
+	return true;
+}
+
+
+
 
 function getMailListByPOP (req, res, recvType, json) {
 	//首先建立连接
@@ -279,8 +420,8 @@ function getMailList (req, res, configJson, recvType, json) {
 }
 
 function sendMail (req, res, data) {
-	var serverConfig = fs.readFileSync(sendServerConfigFile, 'utf-8');
-	var config = JSON.parse(serverConfig)['qq'];
+	var serverConfig = fs.readFileSync(sendConfigJsonFile, 'utf-8');
+	var config = JSON.parse(serverConfig)[ACCOUNT]['qq'];
 
 	console.log('config', config);
 	var transporter = mailer.createTransport("SMTP", config);

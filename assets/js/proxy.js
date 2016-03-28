@@ -14,46 +14,108 @@
 		$('.step[data-name="'+ name +'"]').show();
 	}
 
+	// default DEMO config
 	var configOption = {
 		server : 'qq',
-		setup : {
-			serverName : 'QQ Mail server',
-			serverAddr : '289202839@qq.com',
-			serverPass : 'aaa',
+		account : 'NewAccount',
+		accountInfo : {
+			email : '289202839@qq.com',
+			password : 'PASSWORD',
 			remember : false,
 		},
-		smtp : {
-			server : 'smtp.qq.com',
-			port : 465,
-			username : 'user',
-			password : 'pass',
-			useSSH : true
+		send : {
+			"NewAccount" : {
+				"qq": {
+			        "host": "smtp.qq.com",
+			        "secureConnection": true,
+			        "port": 465,
+			        "auth": {
+			            "user": "289202839@qq.com",
+			            "pass": "password"
+			        }
+			    }
+			}
+		},
+		recv : {
+			"QQMailserver" : {
+				"qq": {
+			        "protocol": "IMAP",
+			        "server" : {
+			            "user": "289202839@qq.com",
+			            "password": "password",
+			            "host": "imap.qq.com",
+			            "port": 993,
+			            "tls": true
+			        }
+			    }
+			}
 		}
 	};
 
 
 	var collectForm = {
 		addMailServer : function ($ctx) {
-			configOption.server = $ctx.attr('data-config');
+			configOption.server = $ctx.find('.list-group-item.active').attr('data-server');
+			console.log("configOption.server", configOption.server);
 		},
 		setupMailServer : function ($ctx) {
-			configOption.setup = {
-				serverName : $ctx.find('input[id="name"]').val(),
-				serverAddr : $ctx.find('input[id="email"]').val(),
-				serverPass : $ctx.find('input[id="password"]').val(),
-				remember : $ctx.find('input[id="remember"]').prop('checked'),
+			var $account = $ctx.find('input[id="name"]');
+			var $email = $ctx.find('input[id="email"]');
+			var $password = $ctx.find('input[id="password"]');
+			var $remember = $ctx.find('input[id="remember"]');
+
+			configOption.account = $account.val();
+			configOption.accountInfo = {
+				email : $email.val(),
+				password : $password.val(),
+				remember : $remember.prop('checked'),
 			}
 
-			console.log('setup', configOption.setup);
+			console.log('configOption.accountInfo', configOption.accountInfo);
 		},
 		setupSendServer : function ($ctx) {
+			var $host = $ctx.find('input[id="sendServer"]');
+			var $port = $ctx.find('input[id="port"]');
+			var $user = $ctx.find('input[id="sendServerUsername"]');
+			var $pass = $ctx.find('input[id="sendServerPassword"]');
+			var $secureConnection = $ctx.find('input[id="secureConnection"]');
+			
+			configOption.send = {
+				"host": $host.val(),
+		        "secureConnection": $secureConnection.prop('checked'),
+		        "port": $port.val(),
+		        "auth": {
+		            "user": $user.val(),
+		            "pass":  $pass.val()//"krugnizmwivecbbi"
+		        }
+			}
 
+			console.log('configOption.send', configOption.send);
 		},
 		setupRecvServer : function ($ctx) {
+			var $protocol = $ctx.find('.dropdown-target:first');
+			var $account = $ctx.find('input[id="account"]');
+			var $host = $ctx.find('input[id="recvServer"]');
+			var $port = $ctx.find('input[id="recvServerPort"]');
+			var $user = $ctx.find('input[id="recvServerUsername"]');
+			var $password = $ctx.find('input[id="recvServerPassword"]');
+			var $tls = $ctx.find('input[id="tls"]');
 
+			configOption.recv = {
+				"protocol": $protocol.text(),
+		        "server" : {
+		            "user": $user.val(),
+		            "password": $password.val(),
+		            "host": $host.val(),
+		            "port": $port.val(),
+		            "tls": $tls.prop('checked')
+		        }
+			}
+
+			console.log("configOption.recv", configOption.recv);
 		},
 		testConnection : function ($ctx) {
-
+			// 写配置文件
 		}
 	};
 
@@ -92,6 +154,31 @@
 			},
 			nextButtonWasPressed : function ($ctx) {
 				
+				// 校验
+				var $account = $ctx.find('input[id="name"]');
+				var $username = $ctx.find('input[id="email"]');
+				var $password = $ctx.find('input[id="password"]');
+				var $remember = $ctx.find('input[id="remember"]');
+
+				$('.error').removeClass('error');
+				// if (!$account.val()) {
+				// 	$account.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+
+				// if (!$username.val()) {
+				// 	$username.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+
+				// if (!$password.val()) {
+				// 	$password.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+
 				collectForm['setupMailServer']($ctx);
 
 				this.currentStatus = 'setupSendServer';
@@ -107,22 +194,89 @@
 				displayPanelByName('setupMailServer');
 			},
 			nextButtonWasPressed : function ($ctx) {
-				
-				collectForm['setupMailServer']($ctx);
+				// 校验
+				$('.error').removeClass('error');
+				var $host = $ctx.find('input[id="sendServer"]');
+				var $port = $ctx.find('input[id="port"]');
+				var $user = $ctx.find('input[id="sendServerUsername"]');
+				var $pass = $ctx.find('input[id="sendServerPassword"]');
 
+				// if (!$host.val()) {
+				// 	$host.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+
+				// if (!$port.val()) {
+				// 	$port.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+
+				// if (!$user.val()) {
+				// 	$user.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+				// 
+				// if (!$pass.val()) {
+				// 	$pass.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+
+
+				collectForm['setupSendServer']($ctx);
 				this.currentStatus = 'setupRecvServer';
-
 				displayPanelByName('setupRecvServer');
 			}
 		},
 		"setupRecvServer" : {
 			prevButtonWasPressed : function () {
 				this.currentStatus = 'setupSendServer';
-
 				displayPanelByName('setupSendServer');
 			},
 			nextButtonWasPressed : function ($ctx) {
+				// 校验
+				var $protocol = $ctx.find('.dropdown-target:first');
+				var $account = $ctx.find('input[id="account"]');
+				var $host = $ctx.find('input[id="recvServer"]');
+				var $port = $ctx.find('input[id="recvServerPort"]');
+				var $user = $ctx.find('input[id="recvServerUsername"]');
+				var $password = $ctx.find('input[id="recvServerPassword"]');
 				
+				$('.error').removeClass('error');
+				// if (!$account.val()) {
+				// 	$account.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+
+				// if (!$host.val()) {
+				// 	$host.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+
+				// if (!$port.val()) {
+				// 	$port.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+				// 
+				// if (!$user.val()) {
+				// 	$user.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+				//  
+				// if (!$password.val()) {
+				// 	$password.addClass('error');
+				// 	alert('请检查输入项');
+				// 	return;
+				// }
+
+
 				collectForm['setupRecvServer']($ctx);
 
 				this.currentStatus = 'testConnection';
@@ -138,7 +292,25 @@
 				displayPanelByName('setupRecvServer');
 			},
 			nextButtonWasPressed : function ($ctx) {
-				window.location = './main.html';
+				//1. write config files
+				$.ajax({
+					url : 'http://localhost:8081/interface.do',
+					type : "POST",
+					data : {
+						action : "CONFIG",
+						data : JSON.stringify(configOption)
+					},
+					success : function (ret) {
+						if (ret.success == true || ret.success == 'true') {
+							// 2. redirect
+							alert('配置成功!');
+							window.location = './main.html?server=' + configOption.server + "&account=" +  configOption.account;
+						} else {
+							alert('配置失败，请联系管理员');
+						}
+					}
+				})
+				
 			}
 		}
 	};
@@ -182,10 +354,60 @@
 
     function init () {
     	
+    	initLoginModal();
         MailServerFSM.currentStatus = 'addMailServer';
         displayPanelByName('addMailServer');
         bindStepEvents();
     };
+
+
+    function initLoginModal () {
+    	var $modal = $('#loginModal');
+    	$modal.modal('show');
+    	$('#cancelLogin').on('click', function () {
+    		$modal.modal('hide');
+    	});
+
+    	$('#login').on('click', function () {
+    		// 1. validate
+    		var $account = $modal.find('#loginUser');
+    		var $password = $modal.find('#loginPass');
+
+    		$('.error').removeClass('error');
+    		if (!$account.val()) {
+    			$account.addClass('error');
+    			alert('请检查输入项');
+    			return;
+    		}
+
+    		if (!$password.val()) {
+    			$password.addClass('error');
+    			alert('请检查输入项');
+    			return;
+    		}
+
+    		// 2. try logging in
+    		var params = {
+				"action" : "LOGIN",
+				"account" : $account.val(),
+				"password" : $password.val()
+			};
+    		$.ajax({
+    			url : 'http://localhost:8081/interface.do',
+    			type : "POST",
+    			dataType : "JSON",
+    			data : params,
+    			success : function (info) {
+    				if (info.success == 'true' || info.success == true) {
+    					alert('登陆成功！');
+    					window.location = './main.html?server=' + info.server + "&account=" +  $account.val();
+    				} else {
+    					alert('帐户或密码错误！');
+    				}
+    			}
+    		});
+    	});
+    }
 
 
     /**

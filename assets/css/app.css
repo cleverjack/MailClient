@@ -2,3 +2,6 @@
 .control-btns {
     padding: 0 10px 0 10px;
 }
+.error {
+	border: 1px solid #f00;
+}

@@ -1,14 +1,14 @@
 (function ($, wangEditor) {
-	var getMailListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server=qq&box=INBOX';
-	var getBadgeUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=badge';
-	var getBoxListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server=qq&box=';
+	var getMailListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server=qq&box=INBOX&account='+getAccount();
+	var getBadgeUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=badge&account='+getAccount();
+	var getBoxListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server=qq&account='+getAccount()+'&box=';
 	var sendMailUrl = 'http://localhost:8081/interface.do';
 	var fromAccount = "289202839@qq.com";
 
 	// 配置信息
 	var CONFIG = {
 		PAGE_SIZE : 5,
-		LIMIT : 3,
+		LIMIT : 5,
 		demoData : {
 			INBOX : [
 				{
@@ -133,6 +133,12 @@
 	};
 
 
+
+	function getAccount () {
+		return getQueryString('account');
+	}
+
+
 	function getMailList () {
 		return $.ajax({
 			url : getMailListUrl,
@@ -150,12 +156,6 @@
 			mail.content = content;
 			mail.desc = content;
 		}
-
-		// if (data.length) {
-		// 	data.sort(function (a, b) {
-		// 		return (+ new Date(a.date)) - (+ new Date(b.date));
-		// 	});
-		// }
 		return data;
 	}
 
@@ -309,6 +309,8 @@
 		}
 		// 最终的数据结构
 		var mailOption = {
+			action : "SEND",
+			account : getAccount(),
 			subject : mailTitle,
 			from : fromAccount,
 			to : mailTo,
@@ -475,7 +477,7 @@
 		var tpl = '<div class="panel panel-info"> \
                     <div class="panel-heading"> \
                         {{SUBJECT}} \
-                        <a class="pull-right mail-detail" data-id="{{MAILID}}">详细</a> \
+                        <a href="#" class="pull-right mail-detail" data-id="{{MAILID}}">详细</a> \
                     </div> \
                     <div class="panel-body"> \
                         {{CONTENT}} \
@@ -528,6 +530,17 @@
 		}
 
 		return ret;
+	}
+
+	function getQueryString(name) {  
+	    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");  
+	    var r = window.location.search.substr(1).match(reg);  //获取url中"?"符后的字符串并正则匹配
+	    var context = "";  
+	    if (r != null)  
+	         context = r[2];  
+	    reg = null;  
+	    r = null;  
+	    return context == null || context == "" || context == "undefined" ? "" : context;  
 	}
 
 	/*==================================== 工具类结束 ===============================================*/
