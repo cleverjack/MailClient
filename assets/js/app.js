@@ -116,13 +116,14 @@
 			// 发送邮件，直接调用接口
 			sendMail(data);
 		},
-		del : function (id) {
+		del : function (src, messageSource) {
 
-			if (isArray(id)) {
-				// 批量删除邮件, 也可只为数组传入一个邮件id进行删除
-			} else {
-				// 单独删除
-			}
+			deleteMail(src, messageSource);
+			// if (isArray(id)) {
+			// 	// 批量删除邮件, 也可只为数组传入一个邮件id进行删除
+			// } else {
+			// 	// 单独删除
+			// }
 		},
 		save : function (mail) {
 			// 存入草稿箱，直接调用接口
@@ -238,6 +239,28 @@
 				});
 			});
 
+
+			$('#delMail').on('click', function () {
+				var srcType = currentBoxType || "INBOX";
+				
+				if (!$('.list-group-item.active').length) {
+					alert('请选择要操作的邮件');
+					return;
+				}
+
+				if ($('.list-group-item.active').length > 1) {
+					alert('测试阶段只支持操作一个邮件，请检查');
+					return;
+				}
+
+				if (confirm('是否要删除邮件？')) {
+					var from = $('.list-group-item.active').attr('data-id');
+					var messageSource = from + ':' + from;
+
+					APP.getMailInstance().del(srcType, messageSource);
+				}
+			});
+
 			var $viewModal = $('#viewModal');
 			$(document).on('click', '.mail-detail', function (ev) {
 				var $current = $(ev.currentTarget);
@@ -273,7 +296,7 @@
 				}
 
 				if ($('.list-group-item.active').length > 1) {
-					alert('测试阶段只支持移动一个邮件，请检查');
+					alert('测试阶段只支持操作一个邮件，请检查');
 					return;
 				}
 
@@ -526,6 +549,29 @@
 
 	function isResultSuccessful (info) {
 		return info.success == true || info.success == 'true';
+	}
+
+
+	function deleteMail (srcBoxName, messageSource) {
+		$.ajax({
+			url : sendMailUrl,
+			type : "POST",
+			data : {
+				action : "DELETE",
+				srcBoxName : srcBoxName,
+				messageSource : messageSource
+			},
+			success : function (info) {
+				if (isResultSuccessful(info)) {
+					if (info.success == true || info.success == 'true') {
+						alert('邮件已经成功删除！');
+						$('#recvMail').trigger('click');
+					} else {
+						alert('邮件发送失败！');
+					}
+				}
+			}
+		});
 	}
 
 	/**

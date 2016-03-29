@@ -104,10 +104,11 @@ http.createServer(function(req, res) {
 		        	break;
 		        case "MOVE":
 		        	var data = params;
-		        	moveMail(data);
-		        	result.success = true;
-	        		res.writeHead(200, { 'Content-Type': 'application/json' });
-		        	res.end(JSON.stringify(result));
+		        	moveMail(req, res, data);
+		        	break;
+		        case "DELETE":
+		        	var data = params;
+		        	deleteMail(req, res, data);
 		        	break;
 	        }
 	    });
@@ -115,14 +116,63 @@ http.createServer(function(req, res) {
     
 }).listen(8081);
 
-function moveMail (data) {
+function deleteMail (req, res, data) {
 	var configFile = fs.readFileSync(recvConfigJsonFile, 'utf-8');
     var serverJSON = JSON.parse(configFile);
     var serverConfig = serverJSON[ACCOUNT][GLOBAL_SERVER];
-
-    // console.log('moveMail serverConfig.server', serverConfig.server);
-
 	var imap = new Imap(serverConfig.server);
+	var result = {};
+
+	var srcBoxName = data['srcBoxName'];
+	var messageSource = data["messageSource"];
+	var srcBox = boxNameMapping[GLOBAL_SERVER][srcBoxName];
+
+	imap.once('ready', function() {
+		imap.openBox(srcBox, false, function (err, box) {
+			if (err) throw err;
+
+			imap.setFlags(messageSource, "Deleted", function (err) {
+				if (err) throw err;
+				console.log('Deleted flag has been successfully set at ' + messageSource);
+
+				imap.expunge(messageSource, function (err) {
+					if (err) throw err;
+					console.log('mail has been deleted');
+					console.log('BOX', box);
+					imap.end();
+
+					result.success = true;
+	        		res.writeHead(200, { 'Content-Type': 'application/json' });
+		        	res.end(JSON.stringify(result));
+				})
+			});
+
+		})
+	});
+
+
+	imap.once('error', function(err) {
+	  console.log(err);
+	});
+
+	imap.once('end', function() {
+	  console.log('Connection ended');
+	});
+
+	imap.connect();
+}
+
+/**
+ * [moveMail 发送移动邮件的动作]
+ * @param  {[type]} data [description]
+ * @return {[type]}      [description]
+ */
+function moveMail (req, res, data) {
+	var configFile = fs.readFileSync(recvConfigJsonFile, 'utf-8');
+    var serverJSON = JSON.parse(configFile);
+    var serverConfig = serverJSON[ACCOUNT][GLOBAL_SERVER];
+	var imap = new Imap(serverConfig.server);
+	var result = {};
 
 	var srcBoxName = data['srcBoxName'];
 	var targetBoxName = data['targetBoxName'];
@@ -138,21 +188,11 @@ function moveMail (data) {
 			imap.move(messageSource, targetBox, function (err) {
 				if (err) throw err;
 				console.log('Successfully moved');
+
+				result.success = true;
+        		res.writeHead(200, { 'Content-Type': 'application/json' });
+	        	res.end(JSON.stringify(result));
 			});
-			// imap.setFlags(messageSource, "\\Deleted", function (err){
-			// 	if (err) throw err;
-			// 	console.log('Flags have been succefully set');
-			// 	console.log('BOX', box);
-			// 	imap.expunge(messageSource, function (err) {
-			// 		if (err) throw err;
-			// 		console.log('mail has been deleted');
-			// 		console.log('BOX', box);
-			// 		imap.end();
-			// 	})
-			// });
-
-
-
 		});
     });
 
