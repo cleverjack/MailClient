@@ -8,14 +8,7 @@
     <title>Mail Client</title>
     <link rel="stylesheet" type="text/css" href="../assets/css/wangEditor.min.css">
     <link rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
-    <style>
-        .error {
-            border: 1px solid #f00;
-        }
-        .mail-content {
-            height: 500px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="../assets/css/app.css">
 </head>
 <body>
     <div id="statusAlert" class="alert alert-warning">
@@ -40,13 +33,14 @@
                         <button type="button" class="btn btn-danger">彻底删除
                         </button>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                 移动到 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a href="#">收信箱</a></li>
-                                <li><a href="#">草稿箱</a></li>
-                                <li><a href="#">垃圾箱</a></li>
+                                <li class="dropdown-menu-item" data-target="INBOX"><a href="#">收件箱</a></li>
+                                <li class="dropdown-menu-item" data-target="SENDBOX"><a href="#">发件箱</a></li>
+                                <li class="dropdown-menu-item" data-target="DRAFT"><a href="#">草稿箱</a></li>
+                                <li class="dropdown-menu-item" data-target="TRASH"><a href="#">垃圾箱</a></li>
                             </ul>
                         </div>
                     </div>

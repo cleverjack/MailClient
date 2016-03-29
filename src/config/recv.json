@@ -16,7 +16,7 @@
             "protocol": "IMAP",
             "server": {
                 "user": "overkazaf@gmail.com",
-                "password": "overkazaf89)!!&",
+                "password": "",
                 "host": "imap.gmail.com",
                 "port": "993",
                 "tls": true
@@ -28,8 +28,20 @@
             "protocol": "IMAP",
             "server": {
                 "user": "18651379775@163.com",
-                "password": "qwert12345",
+                "password": "",
                 "host": "imap.163.com",
+                "port": "993",
+                "tls": true
+            }
+        }
+    },
+    "test": {
+        "qq": {
+            "protocol": "IMAP",
+            "server": {
+                "user": "1129101102@qq.com",
+                "password": "egegrfatnqxjjhgc",
+                "host": "imap.qq.com",
                 "port": "993",
                 "tls": true
             }

@@ -17,7 +17,7 @@
             "port": "465",
             "auth": {
                 "user": "overkazaf@gmail.com",
-                "pass": "overkazaf89)!!&"
+                "pass": ""
             }
         }
     },
@@ -28,7 +28,18 @@
             "port": "465",
             "auth": {
                 "user": "18651379775@163.com",
-                "pass": "qwert12345"
+                "pass": ""
+            }
+        }
+    },
+    "test": {
+        "qq": {
+            "host": "smtp.qq.com",
+            "secureConnection": true,
+            "port": "465",
+            "auth": {
+                "user": "1129101102@qq.com",
+                "pass": "egegrfatnqxjjhgc"
             }
         }
     }

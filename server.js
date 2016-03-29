@@ -14,8 +14,6 @@ var recvConfigJsonFile = './src/config/recv.json';
 var sendConfigJsonFile = './src/config/send.json';
 var accountConfigJsonFile = './src/config/account.json';
 
-var username = '289202839@qq.com';
-var password = 'krugnizmwivecbbi';
 var ACCOUNT = "";
 var GLOBAL_SERVER = "qq";
 
@@ -26,12 +24,14 @@ http.createServer(function(req, res) {
 
     if (req.method == 'GET') {
     	var arg = URL.parse(req.url, true).query;
+
+    	console.log('arg', arg);
 	    var requestType = arg.type;
 	    var action = arg.action;
 	    var boxName = arg.box;
 	    var pageNo = arg.pageno || 1;
 	    var pageSize = arg.pagesize || 5;
-	    var server = arg.server || '163';
+	    var server = arg.server || 'gmail';
 
 	    GLOBAL_SERVER = server;
 		
@@ -43,11 +43,11 @@ http.createServer(function(req, res) {
 	    var configFile = fs.readFileSync(recvConfigJsonFile, 'utf-8');
 	    var serverJSON = JSON.parse(configFile);
 	    var serverConfig = serverJSON[ACCOUNT][server];
-	    console.log('serverConfig', serverConfig);
 	    var protocol = serverConfig['protocol'];
 
 
 	    if (action == 'mail') {
+	    	
 	    	if (protocol == 'IMAP') {
         		getMailList(req, res, {
 	    			'boxName' : boxName || 'INBOX',
@@ -56,7 +56,7 @@ http.createServer(function(req, res) {
 	    		}, 'IMAP', serverConfig.server);
 
 	        } else if (protocol == 'POP') {
-	        	getMailListByPOP(req, res)
+	        	getMailListByPOP(req, res, 'POP', serverConfig.server);
 	        }
     		
     	} else if (action == 'badge'){
@@ -73,6 +73,8 @@ http.createServer(function(req, res) {
 	    // 数据接收完毕，执行回调函数
 	    req.addListener("end", function () {
 	        var params = querystring.parse(postData);
+	        var result = {};
+
 	        ACCOUNT = params.account || 'NewAccount';
 
 	        switch (params.action) {
@@ -84,8 +86,6 @@ http.createServer(function(req, res) {
 	        		var a = setAccount(req, res, data);
 	        		var b = setSend(req, res, data);
 	        		var c = setRecv(req, res, data);
-	        		var result = {};
-
 	        		if (a && b && c) {
 	        			result.success = true;	
 	        		} else {
@@ -97,9 +97,15 @@ http.createServer(function(req, res) {
 	        		break;
 	        	case "LOGIN":
 	        		var data = params;
-	        		var result = {};
 					result.success = tryLogin(data);
-					result.server = '163';
+					result.server = getServerByAccount(data.account);
+	        		res.writeHead(200, { 'Content-Type': 'application/json' });
+		        	res.end(JSON.stringify(result));
+		        	break;
+		        case "MOVE":
+		        	var data = params;
+		        	moveMail(data);
+		        	result.success = true;
 	        		res.writeHead(200, { 'Content-Type': 'application/json' });
 		        	res.end(JSON.stringify(result));
 		        	break;
@@ -108,6 +114,72 @@ http.createServer(function(req, res) {
     }
     
 }).listen(8081);
+
+function moveMail (data) {
+	var configFile = fs.readFileSync(recvConfigJsonFile, 'utf-8');
+    var serverJSON = JSON.parse(configFile);
+    var serverConfig = serverJSON[ACCOUNT][GLOBAL_SERVER];
+
+    // console.log('moveMail serverConfig.server', serverConfig.server);
+
+	var imap = new Imap(serverConfig.server);
+
+	var srcBoxName = data['srcBoxName'];
+	var targetBoxName = data['targetBoxName'];
+	var messageSource = data["messageSource"];
+	var srcBox = boxNameMapping[GLOBAL_SERVER][srcBoxName];
+	var targetBox = boxNameMapping[GLOBAL_SERVER][targetBoxName];
+
+	imap.once('ready', function() {
+		imap.openBox(srcBox, false, function (err, box) {
+			if (err) throw err;
+			console.log('BOX', box);
+
+			imap.move(messageSource, targetBox, function (err) {
+				if (err) throw err;
+				console.log('Successfully moved');
+			});
+			// imap.setFlags(messageSource, "\\Deleted", function (err){
+			// 	if (err) throw err;
+			// 	console.log('Flags have been succefully set');
+			// 	console.log('BOX', box);
+			// 	imap.expunge(messageSource, function (err) {
+			// 		if (err) throw err;
+			// 		console.log('mail has been deleted');
+			// 		console.log('BOX', box);
+			// 		imap.end();
+			// 	})
+			// });
+
+
+
+		});
+    });
+
+    imap.once('error', function(err) {
+	  console.log(err);
+	});
+
+	imap.once('end', function() {
+	  console.log('Connection ended');
+	});
+
+	imap.connect();
+	return true;
+}
+
+	
+function getServerByAccount (account) {
+	var sendJsonFile = fs.readFileSync(sendConfigJsonFile, 'utf-8');
+	var sendJson = JSON.parse(sendJsonFile);
+	if (account in sendJson) {
+		var map = sendJson[account];
+		for (var attr in map) {
+			return attr;
+		}
+	}
+	return "qq";
+}
 
 /**
  * [tryLogin description]
@@ -125,7 +197,6 @@ function tryLogin (json) {
 				flag = true;
 				break;
 			}
-			
 		}
 	}
 
@@ -178,7 +249,9 @@ function setSend (req, res, data) {
 	console.log('info in send', info);
 	var cloned = clone(configJson);
 	var append = clone(info['send']);
-	cloned[info.account] = {};
+	if (!cloned[info.account]) {
+		cloned[info.account] = {};
+	}
 	cloned[info.account][info.server] = append;
 
 	fs.writeFileSync(sendConfigJsonFile, JSON.stringify(cloned), 'utf-8');
@@ -200,7 +273,9 @@ function setRecv (req, res, data) {
 	console.log('info in recv', info);
 	var cloned = clone(configJson);
 	var append = clone(info['recv']);
-	cloned[info.account] = {};
+	if (!cloned[info.account]) {
+		cloned[info.account] = {};
+	}
 	cloned[info.account][info.server] = append;
 
 	fs.writeFileSync(recvConfigJsonFile, JSON.stringify(cloned), 'utf-8');
@@ -211,12 +286,25 @@ function setRecv (req, res, data) {
 
 
 function getMailListByPOP (req, res, recvType, json) {
+	var port = json.port;
+	var host = json.host;
+	var param = {
+		tlserrs: false,
+		enabletls: json.tls,
+		debug: true
+	};
+	var username = json.user;
+	var password = json.password;
+
+	var mailList = [];
 	//首先建立连接
-	var client = new POP3Client(995, 'pop.qq.com', {
-	      tlserrs: false, //是否忽略tls errors
-	      enabletls: true, //传输层安全协议ssl
-	      debug: true //是否在console输出命令和响应信息
-	});
+	var client = new POP3Client(port, host, param);
+
+	// var client = new POP3Client(995, 'pop.qq.com', {
+	//       tlserrs: false, //是否忽略tls errors
+	//       enabletls: true, //传输层安全协议ssl
+	//       debug: true //是否在console输出命令和响应信息
+	// });
 
 	//connect to the remote server
 	client.on('connect', function(){
@@ -247,8 +335,14 @@ function getMailListByPOP (req, res, recvType, json) {
 	  }else{
 	    console.log('LIST success with', msgcount, ' element(s).');
 	    if(msgcount > 0){
-	  //获取第一封邮件
-	      client.retr(1);
+	  	  //获取第一封邮件
+	      for (var i = 1; i < msgcount && i < 3; i++) {
+	      	(function (c) {
+	      		setTimeout(function () {
+		      		client.retr(c);
+		      	}, (c+1) * 400);
+	      	})(i);
+	      }
 	    }
 	  }
 	});
@@ -258,7 +352,27 @@ function getMailListByPOP (req, res, recvType, json) {
 	    console.log('RETR success', msgnumber);
 	    //获得后，输出data数据
 	    console.log('data is ', data);
-	    client.quit();
+	    var mailparser = new MailParser();
+	    mailparser.write(data);
+		mailparser.end();
+
+	    mailparser.on('end', function (mail) {
+	    	console.dir(mail);
+	    	var mailEntity = {
+	    		id : msgnumber,
+	    		subject : mail.subject,
+	    		from : fnJoin(mail.from, 'address'),
+	    		to : fnJoin(mail.to, 'address'),
+	    		date : mail.date
+	    	};
+
+	    	mailList.push(mailEntity);
+
+	    	if (mailList.length == 3) {
+	    		console.log('mailList', mailList);
+	    		client.quit();
+	    	}
+	    });
 	  }else{
 	    console.log('ERR: RETR failed for msgnumber', msgnumber);
 	  }
@@ -267,11 +381,12 @@ function getMailListByPOP (req, res, recvType, json) {
 	client.on('quit', function(status, rawdata){
 	  if(status === true){
 	    console.log('QUIT success');
-	    process.exit(0);
 	  }else{
 	    console.log('ERR: QUIT failed.');
-	    process.exit(0);
 	  }
+
+	    res.writeHead(200, { 'Content-Type': 'application/json' });
+		res.end(JSON.stringify(mailList));
 	});
 }
 
@@ -287,8 +402,24 @@ var boxNameMapping = {
 		"SENDBOX" : "已发送",
 		"TRASH" : "已删除",
 		"DRAFT" : "草稿箱"
+	},
+	"gmail" : {
+		"INBOX" : "INBOX",
+		"TRASH" : "Trash"
 	}
 };
+
+function fnJoin( list , key) {
+	var ret = '';
+	for (var i=0, l = list.length; i < l; i++) {
+		if (i){
+			ret += ',';
+		}
+		ret += list[i][key];
+	}
+
+	return ret;
+}
 
 function getBadgeList (req, res, recvType, json) {
 	var imap = new Imap(json);
@@ -315,6 +446,14 @@ function getBadgeList (req, res, recvType, json) {
 	    	}(boxName);
 	    }
     });
+
+    imap.once('error', function(err) {
+	  console.log(err);
+	});
+
+	imap.once('end', function() {
+	  console.log('Connection ended');
+	});
     
 
 	imap.connect();
@@ -397,8 +536,15 @@ function getMailList (req, res, configJson, recvType, json) {
 				  });
                 });
 
+                var attrUIDList = [];
                 msg.once('attributes', function(attrs) {
-                    console.log(prefix + 'Attributes: %s', inspect(attrs, false, 8));
+                	var entity = inspect(attrs, false, 8);
+                	var re = /uid\s*:\s*(\d+)\s?/;
+                	var match = entity.match(re);
+                	var uid = RegExp["$1"];
+                	attrUIDList.push(uid);
+
+                    console.log(prefix + 'Attributes: %s', entity);
                 });
 
                 msg.once('end', function() {
@@ -406,7 +552,8 @@ function getMailList (req, res, configJson, recvType, json) {
                     if (currentNo != seqno) {
                     	currentNo = seqno;
                     	var mailEntity = Imap.parseHeader(buffer);
-                    	mailEntity.id = boxName + "_" + seqno;
+                    	var uid = attrUIDList[attrUIDList.length-1];
+                    	mailEntity.id = uid;
                     	mailEntity.path = 'mailbodies/msg-' + seqno + '-body.html';
                     	mailList.push(mailEntity);
                     }
@@ -440,7 +587,7 @@ function getMailList (req, res, configJson, recvType, json) {
 
 function sendMail (req, res, data) {
 	var serverConfig = fs.readFileSync(sendConfigJsonFile, 'utf-8');
-	var config = JSON.parse(serverConfig)[ACCOUNT]['qq'];
+	var config = JSON.parse(serverConfig)[ACCOUNT][GLOBAL_SERVER];
 
 	console.log('config', config);
 	var transporter = mailer.createTransport("SMTP", config);

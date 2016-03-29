@@ -6,12 +6,17 @@
     },
     "cmyk": {
         "email": "289202839@qq.com",
-        "password": "qwe123",
+        "password": "krugnizmwivecbbi",
         "remember": false
     },
     "ccc": {
         "email": "18651379775@163.com",
-        "password": "qwe123",
+        "password": "",
         "remember": true
+    },
+    "test": {
+        "email": "1129101102@qq.com",
+        "password": "123456",
+        "remember": false
     }
 }

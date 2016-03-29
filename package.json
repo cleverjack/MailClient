@@ -1,8 +1,8 @@
 {
-  "main": "src/main.html",
   "name": "Mail Client",
+  "main": "http://127.0.0.1:8080/src/proxy.html",
   "window": {
-    "toolbar": true,
+    "toolbar": false,
     "width": 1200,
     "height": 800
   },

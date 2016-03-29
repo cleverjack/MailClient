@@ -1,14 +1,15 @@
 (function ($, wangEditor) {
-	var getMailListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server='+ getServer() +'&box=INBOX&account='+getAccount();
-	var getBadgeUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=badge&account='+getAccount();
-	var getBoxListUrl = 'http://localhost:8081/interface.do?type=get&protocol=imap&action=mail&server='+ getServer() +'&account='+getAccount()+'&box=';
-	var sendMailUrl = 'http://localhost:8081/interface.do';
+	var getMailListUrl = 'http://127.0.0.1:8081/interface.do?type=get&protocol=imap&action=mail&server='+ getServer() +'&box=INBOX&account='+getAccount();
+	var getBadgeUrl = 'http://127.0.0.1:8081/interface.do?type=get&protocol=imap&action=badge&server='+ getServer() +'&account='+getAccount();
+	var getBoxListUrl = 'http://127.0.0.1:8081/interface.do?type=get&protocol=imap&action=mail&server='+ getServer() +'&account='+getAccount()+'&box=';
+	var sendMailUrl = 'http://127.0.0.1:8081/interface.do';
+	var moveMailUrl = 'http://127.0.0.1:8081/move.do';
 	var fromAccount = "289202839@qq.com";
-
+	var currentBoxType = "INBOX";
 	// 配置信息
 	var CONFIG = {
 		PAGE_SIZE : 5,
-		LIMIT : 5,
+		LIMIT : 3,
 		demoData : {
 			INBOX : [
 				{
@@ -107,11 +108,12 @@
 	var $editor = null; // wangEditor实例
 	var PASSWORD = 'vvvxxx'; // 测试邮件的密码， 联网测试时候再填写，不要merge这一行！
 
+
 	function Mail () {};
 	Mail.prototype = {
 		constructor : Mail,
 		send : function (data) {
-			// 发送删除，直接调用接口
+			// 发送邮件，直接调用接口
 			sendMail(data);
 		},
 		del : function (id) {
@@ -125,10 +127,12 @@
 		save : function (mail) {
 			// 存入草稿箱，直接调用接口
 		},
-		moveTo : function (boxType) {
-			// 0: send
-			// 1: draft
-			// 2: trash
+		moveTo : function (src, target, messageSource) {
+			// messageSource -> 1:1或者，1:4
+			// SENDBOX
+			// DRAFT
+			// TRASH
+			moveMail(src, target, messageSource);
 		}
 	};
 
@@ -244,13 +248,49 @@
 				if (targetMail) {
 					loadMail(targetMail, $viewModal);
 				}
+			});
 
+
+			$(document).on('click', '.mail-detail', function (ev) {
+				var $current = $(ev.currentTarget);
+				var mailId = $current.attr('data-id');
+				$viewModal.modal('show');
+
+				var targetMail = fetchMailById(mailId);
+				if (targetMail) {
+					loadMail(targetMail, $viewModal);
+				}
+			});
+
+			$(document).on('click', '.dropdown-menu-item', function (ev) {
+				var $current = $(ev.currentTarget);
+				var targetType = $current.attr('data-target');
+				var srcType = currentBoxType || "INBOX";
+				
+				if (!$('.list-group-item.active').length) {
+					alert('请选择要操作的邮件');
+					return;
+				}
+
+				if ($('.list-group-item.active').length > 1) {
+					alert('测试阶段只支持移动一个邮件，请检查');
+					return;
+				}
+
+				if (confirm('是否要移动邮件？')) {
+					var from = $('.list-group-item.active').attr('data-id');
+					var messageSource = from + ':' + from;
+
+					if (srcType == targetType) {
+						return;
+					}
+					APP.getMailInstance().moveTo(srcType, targetType, messageSource);
+				}
 			});
 
 			$(document).on('click', '.list-group-item', function (ev) {
-				var $current = $(ev.currentTarget);
-				$current.toggleClass('active');
-			})
+				$(ev.currentTarget).toggleClass('active');
+			});
 
 			$('#selectAll').on('click', function () {
 				$('.mail-list').find('.list-group-item').addClass('active');
@@ -262,12 +302,12 @@
 
 			$('.badge-list').on('click', 'li', function (ev) {
 				var $current = $(ev.currentTarget);
-				var currentType = $current.find('span').attr('data-type');
+				currentBoxType = $current.find('span').attr('data-type');
 				if (!$current.hasClass('active')) {
 					$('.badge-list>li').removeClass('active');
 					$current.addClass('active');
 					$('#statusAlert').fadeIn('slow');
-					that.initBox(currentType, function () {
+					that.initBox(currentBoxType, function () {
 						$('#statusAlert').fadeOut('slow');
 					});
 				}
@@ -278,6 +318,10 @@
 			return this.mailer;
 		}
 	};
+
+	// 邮箱客户端实例初始化
+	var APP = new MailApp();
+	APP.init();
 
 	/**
 	 * [constructMail 构建邮件的数据结构]
@@ -365,11 +409,12 @@
 		for (var i = 0, mail; mail = list[i++];) {
 			var str = mailTpl();
 			var subject = mail.subject;
-			subject = !!subject ? subject.join(',') : 'Unknown mail';
+			subject = !!subject ? mail.subject.join(',') : 'Unknown mail';
 
 			subject = subject.length < 20 ? subject : subject.substring(0, 20) + '...';
 			str = str.replace(/{{FROM}}/g, mail.from ? mail.from : "Unknown");
 			str = str.replace(/{{SUBJECT}}/g, subject);
+			str = str.replace(/{{UID}}/g, mail.id);
 			tpl += str;
 		}
 		$container.html(tpl);
@@ -389,12 +434,11 @@
 		var tpl = '';
 		for (var i = 0, mail; i < CONFIG.LIMIT && (mail = list[i++]);) {
 			var str = mailPreviewTpl();
-			var subject = mail.subject && mail.subject.join(',') || 'Unknown';
-
+			var subject = !!mail.subject ? mail.subject : 'Unknown mail';
 			subject = subject.length < 20 ? subject : subject.substring(0, 20) + '...';
 			str = str.replace(/{{SUBJECT}}/g, subject);
 			str = str.replace(/{{CONTENT}}/g, mail.content);
-			str = str.replace(/{{MAILID}}/g, mail.id);
+			str = str.replace(/{{UID}}/g, mail.id);
 			tpl += str;
 		}
 		$container.html(tpl);
@@ -436,7 +480,7 @@
 		$context.find('.mail-date').text(mail.date);
 
 		var $iframe = $('<iframe>').attr({
-			src: 'http://localhost:8080/' + mail.path,
+			src: 'http://127.0.0.1:8080/' + mail.path,
 			frameBorder : '0',
 			marginWidth : 0,
 			marginHeight : 0,
@@ -451,6 +495,40 @@
 	}
 
 	/**
+	 * [moveMail 移动邮件]
+	 * @param  {[type]} srcBoxName       [源文件夹名称]
+	 * @param  {[type]} targetBoxName    [目标文件夹名称]
+	 * @param  {[type]} messageSource [邮件资源]
+	 * @return {[type]}               [description]
+	 */
+	function moveMail (srcBoxName, targetBoxName, messageSource) {
+		$.ajax({
+			url : sendMailUrl,
+			type : "POST",
+			data : {
+				action : "MOVE",
+				srcBoxName : srcBoxName,
+				targetBoxName : targetBoxName,
+				messageSource : messageSource
+			},
+			success : function (info) {
+				if (isResultSuccessful(info)) {
+					if (info.success == true || info.success == 'true') {
+						alert('邮件已经成功移动！');
+						$('#recvMail').trigger('click');
+					} else {
+						alert('邮件发送失败！');
+					}
+				}
+			}
+		});
+	}
+
+	function isResultSuccessful (info) {
+		return info.success == true || info.success == 'true';
+	}
+
+	/**
 	 * [sendMail 发送邮件]
 	 * @param  {[type]} data [description]
 	 * @return {[type]}      [description]
@@ -461,14 +539,13 @@
 			type : 'POST',
 			data : data,
 			success : function (info) {
-				if (info.success == true || info.success == 'true') {
+				if (isResultSuccessful(info)) {
 					alert('邮件已经成功发送！\r\n'+info.message);
 				} else {
 					alert('邮件发送失败！\r\n错误原因：'+info.message);
 				}
 			}
 		});
-
 	}
 
 
@@ -481,7 +558,7 @@
 		var tpl = '<div class="panel panel-info"> \
                     <div class="panel-heading"> \
                         {{SUBJECT}} \
-                        <a href="#" class="pull-right mail-detail" data-id="{{MAILID}}">详细</a> \
+                        <a href="#" class="pull-right mail-detail" data-id="{{UID}}">详细</a> \
                     </div> \
                     <div class="panel-body"> \
                         {{CONTENT}} \
@@ -496,7 +573,7 @@
      */
 	function mailTpl () {
 		var tpl = '<div class="list-group"> \
-                        <a href="#" class="list-group-item"> \
+                        <a href="#" class="list-group-item" data-id="{{UID}}"> \
                             <h4 class="list-group-item-heading">{{FROM}}</h4> \
                             <p class="list-group-item-text">{{SUBJECT}}</p> \
                         </a> \
@@ -549,9 +626,6 @@
 
 	/*==================================== 工具类结束 ===============================================*/
 
-	// 邮箱客户端实例初始化
-	var APP = new MailApp();
-	APP.init();
 
 	return MailApp;
 })(jQuery, wangEditor);
