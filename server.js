@@ -1,31 +1,32 @@
 var http = require('http');
-var mailer = require('nodemailer');
+var mailer = require('nodemailer'); // 发送邮件的模块
 var URL = require('url');
 var Imap = require('imap'); // IMAP协议模块
 var POP3Client = require('poplib'); // POP协议模块
 var inspect = require('util').inspect;
-var fs = require('fs');
-var MailParser = require('mailparser').MailParser;
-var querystring = require('querystring');
+var fs = require('fs'); // nodejs文件系统模块
+var MailParser = require('mailparser').MailParser; // 邮件的解析模块
+var querystring = require('querystring'); // 请求接口的解析模块
 
 
 /* 文件路径 */
-var recvConfigJsonFile = './src/config/recv.json';
-var sendConfigJsonFile = './src/config/send.json';
-var accountConfigJsonFile = './src/config/account.json';
+var sendConfigJsonFile = './src/config/send.json'; // 发件服务器的配置项
+var recvConfigJsonFile = './src/config/recv.json'; // 收件服务器的配置项
+var accountConfigJsonFile = './src/config/account.json'; // 帐户的配置项
 
-var ACCOUNT = "";
-var GLOBAL_SERVER = "qq";
+var ACCOUNT = ""; // 当前的帐户
+var GLOBAL_SERVER = "qq"; // 当前的邮件服务器
 
 http.createServer(function(req, res) {
+	// 允许跨域
     res.setHeader("Access-Control-Allow-Origin", "*");
+
     // 设置接收数据编码格式为 UTF-8
     req.setEncoding('utf-8');
 
+    // 分发GET, POST请求
     if (req.method == 'GET') {
     	var arg = URL.parse(req.url, true).query;
-
-    	console.log('arg', arg);
 	    var requestType = arg.type;
 	    var action = arg.action;
 	    var boxName = arg.box;
@@ -34,20 +35,20 @@ http.createServer(function(req, res) {
 	    var server = arg.server || 'gmail';
 
 	    GLOBAL_SERVER = server;
-		
 		ACCOUNT = arg.account || 'NewAccount';
 
-		console.log('ACCOUNT', ACCOUNT);
-		console.log('server', server);
-
+		// 同步读取配置信息
 	    var configFile = fs.readFileSync(recvConfigJsonFile, 'utf-8');
 	    var serverJSON = JSON.parse(configFile);
 	    var serverConfig = serverJSON[ACCOUNT][server];
 	    var protocol = serverConfig['protocol'];
 
+	    //console.log('ACCOUNT', ACCOUNT);
+		//console.log('server', server);
 
+		// 取邮件列表的接口
 	    if (action == 'mail') {
-	    	
+	    	// 按协议分发邮件列表的请求接口
 	    	if (protocol == 'IMAP') {
         		getMailList(req, res, {
 	    			'boxName' : boxName || 'INBOX',
@@ -58,18 +59,20 @@ http.createServer(function(req, res) {
 	        } else if (protocol == 'POP') {
 	        	getMailListByPOP(req, res, 'POP', serverConfig.server);
 	        }
-    		
     	} else if (action == 'badge'){
+    		// 取邮件数接口
     		getBadgeList(req, res, 'IMAP', serverConfig.server);
     	}
 	    
 	    
     } else {
-    	var postData = ""; //POST & GET ： name=zzl&email=zzl@sina.com
+    	var postData = ""; //POST & GET ： name=aaa&email=bbb@sina.com
+	    
 	    // 数据块接收中
 	    req.addListener("data", function (postDataChunk) {
 	        postData += postDataChunk;
 	    });
+
 	    // 数据接收完毕，执行回调函数
 	    req.addListener("end", function () {
 	        var params = querystring.parse(postData);
@@ -77,6 +80,7 @@ http.createServer(function(req, res) {
 
 	        ACCOUNT = params.account || 'NewAccount';
 
+	        // 分发请求指令
 	        switch (params.action) {
 	        	case "SEND":
 	        		sendMail(req, res, params);
@@ -91,7 +95,6 @@ http.createServer(function(req, res) {
 	        		} else {
 	        			result.success = false;
 	        		}
-
 	        		res.writeHead(200, { 'Content-Type': 'application/json' });
 		        	res.end(JSON.stringify(result));
 	        		break;
@@ -116,29 +119,37 @@ http.createServer(function(req, res) {
     
 }).listen(8081);
 
+/**
+ * [deleteMail 删除邮件]
+ * @param  {[type]} req  [请求对象]
+ * @param  {[type]} res  [响应对象]
+ * @param  {[type]} data [数据结构]
+ * @return {[type]}      [description]
+ */
 function deleteMail (req, res, data) {
 	var configFile = fs.readFileSync(recvConfigJsonFile, 'utf-8');
     var serverJSON = JSON.parse(configFile);
     var serverConfig = serverJSON[ACCOUNT][GLOBAL_SERVER];
 	var imap = new Imap(serverConfig.server);
 	var result = {};
-
 	var srcBoxName = data['srcBoxName'];
 	var messageSource = data["messageSource"];
 	var srcBox = boxNameMapping[GLOBAL_SERVER][srcBoxName];
 
 	imap.once('ready', function() {
+		// 打开源文件夹
 		imap.openBox(srcBox, false, function (err, box) {
 			if (err) throw err;
 
+			// 设置信息源描述对象的标志位为删除
 			imap.setFlags(messageSource, "Deleted", function (err) {
 				if (err) throw err;
 				console.log('Deleted flag has been successfully set at ' + messageSource);
 
 				imap.expunge(messageSource, function (err) {
 					if (err) throw err;
-					console.log('mail has been deleted');
-					console.log('BOX', box);
+					// console.log('mail has been deleted');
+					
 					imap.end();
 
 					result.success = true;
@@ -149,7 +160,6 @@ function deleteMail (req, res, data) {
 
 		})
 	});
-
 
 	imap.once('error', function(err) {
 	  console.log(err);
@@ -164,7 +174,9 @@ function deleteMail (req, res, data) {
 
 /**
  * [moveMail 发送移动邮件的动作]
- * @param  {[type]} data [description]
+ * @param  {[type]} req  [请求对象]
+ * @param  {[type]} res  [响应对象]
+ * @param  {[type]} data [数据结构]
  * @return {[type]}      [description]
  */
 function moveMail (req, res, data) {

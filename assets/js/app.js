@@ -1,15 +1,19 @@
 (function ($, wangEditor) {
-	var getMailListUrl = 'http://127.0.0.1:8081/interface.do?type=get&protocol=imap&action=mail&server='+ getServer() +'&box=INBOX&account='+getAccount();
-	var getBadgeUrl = 'http://127.0.0.1:8081/interface.do?type=get&protocol=imap&action=badge&server='+ getServer() +'&account='+getAccount();
-	var getBoxListUrl = 'http://127.0.0.1:8081/interface.do?type=get&protocol=imap&action=mail&server='+ getServer() +'&account='+getAccount()+'&box=';
-	var sendMailUrl = 'http://127.0.0.1:8081/interface.do';
-	var moveMailUrl = 'http://127.0.0.1:8081/move.do';
-	var fromAccount = "289202839@qq.com";
-	var currentBoxType = "INBOX";
-	// 配置信息
+	var gUrl = 'http://127.0.0.1:8081/'; // 后台接口服务地址
+	var getMailListUrl = gUrl + 'interface.do?type=get&protocol=imap&action=mail&server='+ getServer() +'&box=INBOX&account='+getAccount(); // 获取邮件列表的接口
+	var getBadgeUrl = gUrl + 'interface.do?type=get&protocol=imap&action=badge&server='+ getServer() +'&account='+getAccount(); //获取邮件数目的接口 
+	var getBoxListUrl = gUrl + 'interface.do?type=get&protocol=imap&action=mail&server='+ getServer() +'&account='+getAccount()+'&box=';
+	var sendMailUrl = gUrl + 'interface.do'; // 发送邮件的接口
+	var moveMailUrl = gUrl + 'move.do'; // 移动邮件的接口
+	var fromAccount = "1129101102@qq.com";
+	var currentBoxType = "INBOX"; // 初始化当前邮件所在文件夹
+	var $editor = null; // wangEditor实例
+	var PASSWORD = 'vvvxxx'; // 测试邮件的密码， 联网测试时候再填写，不要merge这一行！
+
+	// 样例配置信息
 	var CONFIG = {
-		PAGE_SIZE : 5,
-		LIMIT : 3,
+		PAGE_SIZE : 5, // 每页显示的邮件数
+		LIMIT : 3, // 预览
 		demoData : {
 			INBOX : [
 				{
@@ -105,31 +109,29 @@
 		INBOX : 3
 	};
 
-	var $editor = null; // wangEditor实例
-	var PASSWORD = 'vvvxxx'; // 测试邮件的密码， 联网测试时候再填写，不要merge这一行！
-
 
 	function Mail () {};
+
+	// 扩展邮件类的原型方法
 	Mail.prototype = {
 		constructor : Mail,
 		send : function (data) {
-			// 发送邮件，直接调用接口
+			// 发送邮件
 			sendMail(data);
 		},
 		del : function (src, messageSource) {
-
-			deleteMail(src, messageSource);
 			// if (isArray(id)) {
 			// 	// 批量删除邮件, 也可只为数组传入一个邮件id进行删除
 			// } else {
 			// 	// 单独删除
 			// }
+			deleteMail(src, messageSource);
 		},
-		save : function (mail) {
-			// 存入草稿箱，直接调用接口
+		save : function (src, target, messageSource) {
+			// 存入草稿箱，直接调用移动的接口，见moveTo
 		},
 		moveTo : function (src, target, messageSource) {
-			// messageSource -> 1:1或者，1:4
+			// messageSource 的数据结构为 1:1或者，1:4， 在调用前把messageSource组装好
 			// SENDBOX
 			// DRAFT
 			// TRASH
@@ -138,16 +140,27 @@
 	};
 
 
-
+	/**
+	 * [getAccount 获取当前的帐户参数]
+	 * @return {[type]} [description]
+	 */
 	function getAccount () {
 		return getQueryString('account');
 	}
 
+	/**
+	 * [getServer 获取当前的邮箱服务器]
+	 * @return {[type]} [description]
+	 */
 	function getServer () {
 		return getQueryString('server');
 	}
 
 
+	/**
+	 * [getMailList 获取当前邮箱下的邮件列表]
+	 * @return {[Deffered]} [延迟对象]
+	 */
 	function getMailList () {
 		return $.ajax({
 			url : getMailListUrl,
@@ -155,6 +168,11 @@
 		})
 	}
 
+	/**
+	 * [decorationMailContents 修饰邮件的概要信息]
+	 * @param  {[type]} data [description]
+	 * @return {[type]}      [description]
+	 */
 	function decorationMailContents (data) {
 		for (var i = 0, mail; mail = data[i++];) {
 			var content  = '日期：' + mail.date;
@@ -169,15 +187,19 @@
 	}
 
 
+	/**
+	 * [MailApp 邮箱客户端类]
+	 */
 	function MailApp (){};
 
+	// 扩展邮箱客户端类的原型方法
 	MailApp.prototype = {
 		constructor : MailApp,
 		init : function () {
 			var that = this;
 			this.mailer = new Mail();
 
-			
+			// 初始化邮箱信息时， 给出警示信息
 			$('#statusAlert').fadeIn('slow');
 			initBadges();
 			this.initBox('INBOX', function () {
@@ -185,6 +207,7 @@
 				$('#statusAlert').fadeOut('slow');
 			});
 
+			// 初始化富文本编辑器
 			$editor = new wangEditor('toolbar');
 			$editor.create();
 		}, 
@@ -195,8 +218,13 @@
 				cache : false,
 				type : 'GET',
 				success : function (list) {
+					// 刷新缓存数据
 					CONFIG.demoData[boxName] = decorationMailContents(list);
+
+					// 初始化当前的邮件列表
 					initMailList(CONFIG.demoData[boxName], BOX_TYPE[boxName], 1, CONFIG.PAGE_SIZE);
+					
+					// 初始化当前的邮件概要
 					initMailPreview(CONFIG.demoData[boxName], BOX_TYPE[boxName], 1, CONFIG.PAGE_SIZE, 3);
 				}
 			}).done(function () {
@@ -205,6 +233,8 @@
 		},
 		bindEvents : function () {
 			var that = this;
+			
+			// 写邮件的按钮事件
 			var $writeModal = $('#writeModal');
 			$('#writeMail').on('click', function () {
 				$writeModal.modal('show');
@@ -227,6 +257,7 @@
 				}
 			});
 
+			// 刷新、收取邮件的按钮事件
 			$('#recvMail').on('click', function () {
 				$('#statusAlert').fadeIn('slow');
 				$('.main-body').hide();
@@ -240,6 +271,7 @@
 			});
 
 
+			// 删除邮件的按钮事件
 			$('#delMail').on('click', function () {
 				var srcType = currentBoxType || "INBOX";
 				
@@ -261,6 +293,7 @@
 				}
 			});
 
+			// 打开邮件详情的按钮事件
 			var $viewModal = $('#viewModal');
 			$(document).on('click', '.mail-detail', function (ev) {
 				var $current = $(ev.currentTarget);
@@ -273,18 +306,7 @@
 				}
 			});
 
-
-			$(document).on('click', '.mail-detail', function (ev) {
-				var $current = $(ev.currentTarget);
-				var mailId = $current.attr('data-id');
-				$viewModal.modal('show');
-
-				var targetMail = fetchMailById(mailId);
-				if (targetMail) {
-					loadMail(targetMail, $viewModal);
-				}
-			});
-
+			// 移动邮件的按钮事件
 			$(document).on('click', '.dropdown-menu-item', function (ev) {
 				var $current = $(ev.currentTarget);
 				var targetType = $current.attr('data-target');
@@ -311,18 +333,22 @@
 				}
 			});
 
+			// 邮件选中状态的切换事件
 			$(document).on('click', '.list-group-item', function (ev) {
 				$(ev.currentTarget).toggleClass('active');
 			});
 
+			// 全选当前页的邮件
 			$('#selectAll').on('click', function () {
 				$('.mail-list').find('.list-group-item').addClass('active');
 			});
 
+			// 取消全选当前页的邮件
 			$('#cancelAll').on('click', function () {
 				$('.mail-list').find('.list-group-item').removeClass('active');
 			});
 
+			// 显示不同文件夹内的邮件列表
 			$('.badge-list').on('click', 'li', function (ev) {
 				var $current = $(ev.currentTarget);
 				currentBoxType = $current.find('span').attr('data-type');
@@ -338,6 +364,7 @@
 
 		},
 		getMailInstance : function () {
+			// 获取邮件实例
 			return this.mailer;
 		}
 	};
@@ -378,7 +405,7 @@
 			$content.focus();
 			return null;
 		}
-		// 最终的数据结构
+		// 组装最终的数据结构
 		var mailOption = {
 			action : "SEND",
 			account : getAccount(),
@@ -402,6 +429,11 @@
 		return badgeListJson
 	}
 
+
+	/**
+	 * [initBadges 初始化各个文件夹内的邮件数]
+	 * @return {[type]} [description]
+	 */
 	function initBadges () {
 		$.ajax({
 			url : getBadgeUrl,
@@ -486,7 +518,6 @@
 					break;
 				}
 			}
-
 			if (found) break;
 		}
 
@@ -547,11 +578,13 @@
 		});
 	}
 
-	function isResultSuccessful (info) {
-		return info.success == true || info.success == 'true';
-	}
 
-
+	/**
+	 * [deleteMail 删除给定文件夹下的邮件]
+	 * @param  {[type]} srcBoxName    [源文件夹名]
+	 * @param  {[type]} messageSource [邮件的信息源描述对象， 如1:3]
+	 * @return {[type]}               [description]
+	 */
 	function deleteMail (srcBoxName, messageSource) {
 		$.ajax({
 			url : sendMailUrl,
@@ -659,6 +692,20 @@
 		return ret;
 	}
 
+	/**
+	 * [isResultSuccessful 判断返回结果是否成功]
+	 * @param  {[type]}  info [description]
+	 * @return {Boolean}      [description]
+	 */
+	function isResultSuccessful (info) {
+		return info.success == true || info.success == 'true';
+	}
+
+	/**
+	 * [getQueryString 获取地址栏内的查询参数]
+	 * @param  {[type]} name [查询的参数键]
+	 * @return {[type]}      [description]
+	 */
 	function getQueryString(name) {  
 	    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");  
 	    var r = window.location.search.substr(1).match(reg);  //获取url中"?"符后的字符串并正则匹配
@@ -671,7 +718,6 @@
 	}
 
 	/*==================================== 工具类结束 ===============================================*/
-
 
 	return MailApp;
 })(jQuery, wangEditor);
