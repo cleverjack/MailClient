@@ -6,7 +6,7 @@
             "port": 465,
             "auth": {
                 "user": "289202839@qq.com",
-                "pass": "krugnizmwivecbbi"
+                "pass": ""
             }
         }
     },
@@ -28,7 +28,7 @@
             "port": "465",
             "auth": {
                 "user": "18651379775@163.com",
-                "pass": "qwert12345"
+                "pass": ""
             }
         }
     },

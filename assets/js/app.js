@@ -9,7 +9,6 @@
 	var currentBoxType = "INBOX"; // 初始化当前邮件所在文件夹
 	var $editor = null; // wangEditor实例
 	var PASSWORD = 'vvvxxx'; // 测试邮件的密码， 联网测试时候再填写，不要merge这一行！
-
 	// 样例配置信息
 	var CONFIG = {
 		PAGE_SIZE : 5, // 每页显示的邮件数
@@ -559,8 +558,11 @@
 		$.ajax({
 			url : sendMailUrl,
 			type : "POST",
+			cache : false,
 			data : {
 				action : "MOVE",
+				account : getAccount(),
+				server : getServer(),
 				srcBoxName : srcBoxName,
 				targetBoxName : targetBoxName,
 				messageSource : messageSource
@@ -589,8 +591,11 @@
 		$.ajax({
 			url : sendMailUrl,
 			type : "POST",
+			cache : false,
 			data : {
 				action : "DELETE",
+				account : getAccount(),
+				server : getServer(),
 				srcBoxName : srcBoxName,
 				messageSource : messageSource
 			},

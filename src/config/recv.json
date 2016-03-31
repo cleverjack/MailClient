@@ -4,7 +4,7 @@
             "protocol": "IMAP",
             "server": {
                 "user": "289202839@qq.com",
-                "password": "krugnizmwivecbbi",
+                "password": "",
                 "host": "imap.qq.com",
                 "port": 993,
                 "tls": true
@@ -28,7 +28,7 @@
             "protocol": "IMAP",
             "server": {
                 "user": "18651379775@163.com",
-                "password": "qwert12345",
+                "password": "",
                 "host": "imap.163.com",
                 "port": "993",
                 "tls": true
