@@ -12,7 +12,8 @@
 	// 样例配置信息
 	var CONFIG = {
 		PAGE_SIZE : 5, // 每页显示的邮件数
-		LIMIT : 3, // 预览
+		LIMIT : 5, // 预览
+		PREVIEW_COLLAPSE_INDEX : 1, // 邮件概要的收缩起始索引
 		demoData : {
 			INBOX : [
 				{
@@ -108,6 +109,13 @@
 		INBOX : 3
 	};
 
+	var BOX_NAME = {
+		INBOX : "收件箱",
+		SENDBOX : "发件箱",
+		DRAFT : "草稿箱",
+		TRASH : "垃圾箱"
+	}
+
 
 	function Mail () {};
 
@@ -200,10 +208,13 @@
 
 			// 初始化邮箱信息时， 给出警示信息
 			$('#statusAlert').fadeIn('slow');
-			initBadges();
-			this.initBox('INBOX', function () {
-				that.bindEvents();
-				$('#statusAlert').fadeOut('slow');
+			initBadges(function () {
+				that.initBox('INBOX', function () {
+					that.bindEvents();
+					$('#statusAlert').fadeOut('slow');
+
+					initPagination();
+				});
 			});
 
 			// 初始化富文本编辑器
@@ -225,6 +236,28 @@
 					
 					// 初始化当前的邮件概要
 					initMailPreview(CONFIG.demoData[boxName], BOX_TYPE[boxName], 1, CONFIG.PAGE_SIZE, 3);
+				}
+			}).done(function () {
+				callback && callback();
+			});
+		},
+		initBoxAndPage : function (boxName, json, callback) {
+			var pageNo = json['pageno'];
+			var pageSize = json['pagesize'];
+			var boxUrl = getBoxListUrl + boxName + "&pageno=" + pageNo + '&pagesize=' + pageSize;
+			$.ajax({
+				url : boxUrl,
+				cache : false,
+				type : 'GET',
+				success : function (list) {
+					// 刷新缓存数据
+					CONFIG.demoData[boxName] = decorationMailContents(list);
+
+					// 初始化当前的邮件列表
+					initMailList(CONFIG.demoData[boxName], BOX_TYPE[boxName], pageNo, pageSize);
+					
+					// 初始化当前的邮件概要
+					initMailPreview(CONFIG.demoData[boxName], BOX_TYPE[boxName], pageNo, pageSize, 3);
 				}
 			}).done(function () {
 				callback && callback();
@@ -295,6 +328,7 @@
 			// 打开邮件详情的按钮事件
 			var $viewModal = $('#viewModal');
 			$(document).on('click', '.mail-detail', function (ev) {
+
 				var $current = $(ev.currentTarget);
 				var mailId = $current.attr('data-id');
 				$viewModal.modal('show');
@@ -334,6 +368,7 @@
 
 			// 邮件选中状态的切换事件
 			$(document).on('click', '.list-group-item', function (ev) {
+				
 				$(ev.currentTarget).toggleClass('active');
 			});
 
@@ -357,10 +392,12 @@
 					$('#statusAlert').fadeIn('slow');
 					that.initBox(currentBoxType, function () {
 						$('#statusAlert').fadeOut('slow');
+
+						switchCurrentBox();
+						initPagination();
 					});
 				}
 			});
-
 		},
 		getMailInstance : function () {
 			// 获取邮件实例
@@ -368,10 +405,15 @@
 		}
 	};
 
+
 	// 邮箱客户端实例初始化
 	var APP = new MailApp();
 	APP.init();
 
+
+	function switchCurrentBox () {
+		$('.current-box').text(BOX_NAME[currentBoxType]);
+	}
 	/**
 	 * [constructMail 构建邮件的数据结构]
 	 * @param  {[type]} $ctx [模态窗口上下文]
@@ -433,7 +475,7 @@
 	 * [initBadges 初始化各个文件夹内的邮件数]
 	 * @return {[type]} [description]
 	 */
-	function initBadges () {
+	function initBadges (callback) {
 		$.ajax({
 			url : getBadgeUrl,
 			type : "GET",
@@ -444,6 +486,8 @@
 				$badgeList.find('.badge[data-type="SENDBOX"]').text(data.SENDBOX.total);
 				$badgeList.find('.badge[data-type="TRASH"]').text(data.TRASH.total);
 				$badgeList.find('.badge[data-type="DRAFT"]').text(data.DRAFT.total);
+
+				callback && callback();
 			}
 		});
 	}
@@ -471,7 +515,7 @@
 			str = str.replace(/{{UID}}/g, mail.id);
 			tpl += str;
 		}
-		$container.html(tpl);
+		$container.html(tpl).removeClass('hidden');
 	}
 
 
@@ -495,7 +539,24 @@
 			str = str.replace(/{{UID}}/g, mail.id);
 			tpl += str;
 		}
-		$container.html(tpl);
+		$container.html(tpl).removeClass('hidden');
+
+		bindTogglePrivew($container)
+	}
+
+	function bindTogglePrivew ($ctx) {
+		$ctx.off('click').on('click', '.panel-heading', function (ev) {
+			var $target = $(ev.currentTarget);
+			var $panel = $target.closest('.panel');
+			var $body = $panel.find('.panel-body');
+			$body.toggle(300);
+		})
+
+		if ($ctx.find('.panel').length > CONFIG.PREVIEW_COLLAPSE_INDEX) {
+			$ctx.find('.panel-heading').filter(function (index) {
+				return index >= CONFIG.PREVIEW_COLLAPSE_INDEX;
+			}).trigger('click');
+		}
 	}
 
 
@@ -632,6 +693,95 @@
 		});
 	}
 
+	/**
+	 * [initPagination 分页插件初始化]
+	 * @return {[type]} [description]
+	 */
+	function initPagination () {
+		var mailBox = currentBoxType;
+		var total = $('.badge[data-type="'+ mailBox +'"]').text();
+		var pageSize = CONFIG['PAGE_SIZE'];
+		var totalPages = Math.ceil(total/pageSize);
+		var $pager = $('.pagination');
+
+
+		fixPagerRange(1, totalPages, $pager);
+
+		setActivePage(1, $pager);
+
+		$pager.off('click').on('click', 'li', function (ev) {
+			var $target = $(ev.currentTarget);
+			var pageNo = $target.text();
+			
+			if (isNaN(pageNo)) {
+				// 上一页或下一页
+				var currentNo = parseInt($pager.find('li.active').text());
+				if ($target.hasClass('prev')) {
+					if (currentNo != 1) {
+						$pager.find('li.active').prev().trigger('click');
+					}
+				} else if ($target.hasClass('next')) {
+					if (currentNo != totalPages) {
+						$pager.find('li.active').next().trigger('click');
+					}
+				}
+			} else {
+				var $aLi = $pager.find('li');
+				var start = parseInt($aLi.eq(1).text());
+				var end = parseInt($aLi.eq($aLi.length-2).text());
+				var half = Math.floor((end - start + 1) / 2) + 1;
+				var newStart = pageNo - 5;
+
+				APP.initBoxAndPage(mailBox, {
+					pageno : pageNo,
+					pagesize : CONFIG.PAGE_SIZE
+				}, function () {
+					if (start < total - 10) {
+						if (pageNo > half) {
+							if (newStart <= total - 5) {
+								fixPagerRange(newStart, totalPages, $pager);
+							}
+						} else if (pageNo <= half){
+							if (newStart >= 1) {
+								fixPagerRange(newStart, totalPages, $pager);
+							}
+						}
+					}
+					
+					setActivePage(pageNo, $pager);
+				});
+			}
+			
+		})
+	}
+
+	function setActivePage (pageNo, $pager) {
+		$pager.removeClass('hidden');
+		$pager.find('li').removeClass('active');
+		$pager.find('li').filter(function () {
+			return $(this).text() == pageNo;
+		}).addClass('active');
+	}
+
+
+	function fixPagerRange (start, total, $pager) {
+		var pageHtml = [],
+			end = (10 + start) <= total ? (10 + start) : total;
+
+		if (total == 1) {
+			$pager.hide();
+		} else {
+			$pager.show();
+		}
+
+		pageHtml.push('<li class="prev"><a href="#">&laquo;</a></li>');
+		for (var i = start; i <= end; i++) {
+			pageHtml.push('<li><a href="#">'+ i +'</a></li>');
+		}
+		pageHtml.push('<li class="next"><a href="#">&raquo;</a></li>');
+		$pager.html(pageHtml.join(''));
+	}
+
 
 	/*==================================== 模板函数开始 ==============================================*/
 	/**
@@ -642,10 +792,10 @@
 		var tpl = '<div class="panel panel-info"> \
                     <div class="panel-heading"> \
                         {{SUBJECT}} \
-                        <a href="#" class="pull-right mail-detail" data-id="{{UID}}">详细</a> \
                     </div> \
                     <div class="panel-body"> \
                         {{CONTENT}} \
+                        <a href="#" class="btn btn-primary btn-xs pull-right mail-detail" data-id="{{UID}}">详细</a> \
                     </div> \
                 </div>';
         return tpl;

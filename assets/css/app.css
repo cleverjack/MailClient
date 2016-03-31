@@ -1,10 +1,25 @@
 @charset utf-8;
+#statusAlert {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width:100%;
+	z-index: 999;
+}
 .control-btns {
     padding: 0 10px 0 10px;
 }
 
 .error {
     border: 1px solid #f00;
+}
+
+.main {
+	margin-top: 14px;
+}
+
+.panel-heading {
+	cursor: pointer;
 }
 
 .mail-content {

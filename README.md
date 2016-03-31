@@ -13,7 +13,7 @@
 #Features
 #####Main
   
-  * accountsBinding 帐号绑定/切换（qq, 163）
+  * accountsBinding 帐号绑定/切换（qq, 163, gmail）
   * accountsConfiguration 帐号设置（邮件服务器的配置）
   * sendMail 写信
   * receiveMail 收信
@@ -41,7 +41,7 @@
 #Plugins
   * bootstrap plugins
   * customatic plugins
-  * ueditor/ckeditor
+  * wangEditor
 
 #Data Models
   see **data-models-readme.md**
@@ -58,6 +58,7 @@
 2. 2016年2月21日交付物：核心功能的截图，程序主框架描述及核心类的实现代码
 3. 2016年3月27日交付物：完整产品及一份开发文档
 
-
 #Usage
-  nw mailclient	
+  step 1. python -m SimpleHTTPServer 8080
+  step 2. node server.js
+  step 3. nw mailclient	
