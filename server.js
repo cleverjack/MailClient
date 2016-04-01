@@ -649,14 +649,19 @@ function getMailList(req, res, configJson, recvType, json) {
 }
 
 function sendMail(req, res, data) {
+    var account = data['account'];
+    var server  = data['server'];
     var serverConfig = fs.readFileSync(sendConfigJsonFile, 'utf-8');
-    var config = JSON.parse(serverConfig)[ACCOUNT][GLOBAL_SERVER];
+    var config = JSON.parse(serverConfig)[account][server];
 
+    console.log('account', account);
+    console.log('server', server);
     console.log('config', config);
     var transporter = mailer.createTransport("SMTP", config);
-
+    var auth = config['auth'];
+    console.log('auth', auth);
     var mail = {
-        from: config.auth.user,
+        from: auth['user'],
         to: data['to'],
         subject: data['subject'],
         html: data['content']
@@ -666,6 +671,7 @@ function sendMail(req, res, data) {
         if (error) {
             result.success = false;
             result.message = error;
+            throw error;
         } else {
             result.success = true;
             result.message = response.message;

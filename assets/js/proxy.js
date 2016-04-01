@@ -133,7 +133,9 @@
 	var MailServerFSM = {
 		"addMailServer" : {
 			prevButtonWasPressed : function () {
-				doNothing();
+				// doNothing();
+				var $modal = $('#loginModal');
+				$modal.modal('show');
 			},
 			nextButtonWasPressed : function ($ctx) {
 				// 1. display setupMailServer modal panel

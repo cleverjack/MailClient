@@ -325,6 +325,12 @@
 				}
 			});
 
+			$('#logout').on('click', function () {
+				if (confirm('确定要退出？')) {
+					window.location.href = 'http://127.0.0.1:8080/src/proxy.html';
+				}
+			});
+
 			// 打开邮件详情的按钮事件
 			var $viewModal = $('#viewModal');
 			$(document).on('click', '.mail-detail', function (ev) {
@@ -450,6 +456,7 @@
 		var mailOption = {
 			action : "SEND",
 			account : getAccount(),
+			server : getServer(),
 			subject : mailTitle,
 			from : fromAccount,
 			to : mailTo,
@@ -549,7 +556,7 @@
 			var $target = $(ev.currentTarget);
 			var $panel = $target.closest('.panel');
 			var $body = $panel.find('.panel-body');
-			$body.toggle(300);
+			$body.slideToggle(300);
 		})
 
 		if ($ctx.find('.panel').length > CONFIG.PREVIEW_COLLAPSE_INDEX) {
