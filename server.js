@@ -442,14 +442,20 @@ function getMailListByPOP(req, res, recvType, json) {
     });
     //QUIT handler
     client.on('quit', function(status, rawdata) {
-        if (status === true) {
-            console.log('QUIT success');
+       var message = '';
+		if (status === true) {
+            message = 'QUIT success';
         } else {
-            console.log('ERR: QUIT failed.');
+            message = 'ERR: QUIT failed.';
         }
+		console.log(message);
 
+        var ret = {};
+		ret.success = status;
+		ret.message = message;
+		ret.data = mailList;
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(mailList));
+        res.end(JSON.stringify(ret));
     });
 }
 
