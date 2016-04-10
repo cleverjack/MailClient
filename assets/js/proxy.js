@@ -237,11 +237,6 @@
 				var $password = $ctx.find('input[id="recvServerPassword"]');
 				
 				$('.error').removeClass('error');
-				if (!$account.val()) {
-					$account.addClass('error');
-					alert('请检查输入项');
-					return;
-				}
 				if (!$host.val()) {
 					$host.addClass('error');
 					alert('请检查输入项');
