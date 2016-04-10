@@ -131,20 +131,24 @@ var myServer = http.createServer(function(req, res) {
  * @return {[type]}      [description]
  */
 function deleteMail(req, res, data) {
-    var configFile = fs.readFileSync(recvConfigJsonFile, 'utf-8');
-    var serverJSON = JSON.parse(configFile);
     var account = data["account"];
     var server = data["server"];
+    var configFile = fs.readFileSync(recvConfigJsonFile, 'utf-8');
+    var serverJSON = JSON.parse(configFile);
     var serverConfig = serverJSON[account][server];
+    console.log('account', account);
+    console.log('server', server);
+    console.log('serverConfig', serverConfig);
+    
     var imap = new Imap(serverConfig.server);
     var result = {};
     var srcBoxName = data['srcBoxName'];
     var messageSource = data["messageSource"];
-    var srcBox = boxNameMapping[GLOBAL_SERVER][srcBoxName];
-
+    var srcBox = boxNameMapping[server][srcBoxName];
+    console.log('srcBox', srcBox);
     imap.once('ready', function() {
         // 打开源文件夹
-        imap.openBox(srcBox, false, function(err, box) {
+        imap.openBox(srcBox, true, function(err, box) {
             if (err) throw err;
 
             // 设置信息源描述对象的标志位为删除
@@ -200,8 +204,8 @@ function moveMail(req, res, data) {
     var srcBoxName = data['srcBoxName'];
     var targetBoxName = data['targetBoxName'];
     var messageSource = data["messageSource"];
-    var srcBox = boxNameMapping[GLOBAL_SERVER][srcBoxName];
-    var targetBox = boxNameMapping[GLOBAL_SERVER][targetBoxName];
+    var srcBox = boxNameMapping[server][srcBoxName];
+    var targetBox = boxNameMapping[server][targetBoxName];
 
     imap.once('ready', function() {
         imap.openBox(srcBox, false, function(err, box) {
@@ -442,20 +446,14 @@ function getMailListByPOP(req, res, recvType, json) {
     });
     //QUIT handler
     client.on('quit', function(status, rawdata) {
-       var message = '';
-		if (status === true) {
-            message = 'QUIT success';
+        if (status === true) {
+            console.log('QUIT success');
         } else {
-            message = 'ERR: QUIT failed.';
+            console.log('ERR: QUIT failed.');
         }
-		console.log(message);
 
-        var ret = {};
-		ret.success = status;
-		ret.message = message;
-		ret.data = mailList;
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(ret));
+        res.end(JSON.stringify(mailList));
     });
 }
 
@@ -539,6 +537,9 @@ function getMailList(req, res, configJson, recvType, json) {
     }
 
     var boxName = configJson['boxName'];
+     var mailList = [],
+        currentNo = 0,
+        attrUIDList = [];
     imap.once('ready', function() {
         imap.getBoxes(function(err, boxes) {
             if (err) throw err;
@@ -559,9 +560,6 @@ function getMailList(req, res, configJson, recvType, json) {
                 bodies: '',
                 struct: true
             });
-
-            var mailList = [],
-                currentNo = 0;
 
             f.on('message', function(msg, seqno) {
                 var mailparser = new MailParser();
@@ -584,6 +582,30 @@ function getMailList(req, res, configJson, recvType, json) {
                     });
 
                     mailparser.on("end", function(mail) {
+                        console.log('mail', mail);
+                         var froms = mail['from'];
+                         var tos = mail['to'];
+                         var fromString = '';
+                         var toStr = '';
+                         for (var f = 0; f < froms.length; f++) {
+                            if (f) fromString + ';'
+                            fromString += froms[f]['address'];
+                         }
+
+                         for (var t = 0; t < tos.length; t++) {
+                            if (t) toStr + ';'
+                            toStr += tos[t]['address'];
+                         }
+                         var mailEntity = {
+                            from : fromString,
+                            to : toStr,
+                            date : mail['date'],
+                            subject : mail['subject']
+                         };
+                         mailEntity.path = 'mailbodies/msg-' + seqno + '-body.html';
+                         mailList.push(mailEntity);
+
+                         console.log('mailList', mailList)
                         fs.writeFile('mailbodies/msg-' + seqno + '-body.html', mail.html, function(err) {
                             if (err) {
                                 throw err;
@@ -605,7 +627,7 @@ function getMailList(req, res, configJson, recvType, json) {
                     });
                 });
 
-                var attrUIDList = [];
+               
                 msg.once('attributes', function(attrs) {
                     var entity = inspect(attrs, false, 8);
                     var re = /uid\s*:\s*(\d+)\s?/;
@@ -618,14 +640,6 @@ function getMailList(req, res, configJson, recvType, json) {
 
                 msg.once('end', function() {
                     console.log(prefix + 'Finished');
-                    if (currentNo != seqno) {
-                        currentNo = seqno;
-                        var mailEntity = Imap.parseHeader(buffer);
-                        var uid = attrUIDList[attrUIDList.length - 1];
-                        mailEntity.id = uid;
-                        mailEntity.path = 'mailbodies/msg-' + seqno + '-body.html';
-                        mailList.push(mailEntity);
-                    }
                 });
             });
 
@@ -634,12 +648,9 @@ function getMailList(req, res, configJson, recvType, json) {
             });
 
             f.once('end', function() {
-                console.log('Done fetching all messages!');
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(mailList));
                 imap.end();
             });
-
+ 
         });
     });
 
@@ -649,23 +660,31 @@ function getMailList(req, res, configJson, recvType, json) {
 
     imap.once('end', function() {
         console.log('Connection ended');
+        console.log('Done fetching all messages!');
+        for (var i = 0; i < mailList.length; i++) {
+            var uid = attrUIDList[i];
+            mailList[i].id = uid;
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(mailList));
     });
 
     imap.connect();
 }
 
 function sendMail(req, res, data) {
+    var server = data['server'];
     var account = data['account'];
-    var server  = data['server'];
     var serverConfig = fs.readFileSync(sendConfigJsonFile, 'utf-8');
     var config = JSON.parse(serverConfig)[account][server];
 
-    console.log('account', account);
     console.log('server', server);
+    console.log('account', account);
     console.log('config', config);
-    var transporter = mailer.createTransport("SMTP", config);
     var auth = config['auth'];
     console.log('auth', auth);
+    var transporter = mailer.createTransport("SMTP", config);
+
     var mail = {
         from: auth['user'],
         to: data['to'],

@@ -228,6 +228,7 @@
 				cache : false,
 				type : 'GET',
 				success : function (list) {
+					console.log('list', list);
 					// 刷新缓存数据
 					CONFIG.demoData[boxName] = decorationMailContents(list);
 
@@ -288,6 +289,14 @@
 					});
 				}
 			});
+
+			// $('#refresh').on('click', function () {
+			// 	try {
+			// 		window.reload();
+			// 	} catch (e) {
+			// 		window.location.href = window.location.href;
+			// 	}
+			// });
 
 			// 刷新、收取邮件的按钮事件
 			$('#recvMail').on('click', function () {
@@ -514,7 +523,7 @@
 		for (var i = 0, mail; mail = list[i++];) {
 			var str = mailTpl();
 			var subject = mail.subject;
-			subject = !!subject ? mail.subject.join(',') : 'Unknown mail';
+			subject = !!subject ? mail.subject : 'Unknown mail';
 
 			subject = subject.length < 20 ? subject : subject.substring(0, 20) + '...';
 			str = str.replace(/{{FROM}}/g, mail.from ? mail.from : "Unknown");
@@ -664,7 +673,7 @@
 				action : "DELETE",
 				account : getAccount(),
 				server : getServer(),
-				srcBoxName : srcBoxName,
+				srcBoxName : srcBoxName || 'INBOX',
 				messageSource : messageSource
 			},
 			success : function (info) {
@@ -693,6 +702,7 @@
 			success : function (info) {
 				if (isResultSuccessful(info)) {
 					alert('邮件已经成功发送！\r\n'+info.message);
+					$('#recvMail').trigger('click');
 				} else {
 					alert('邮件发送失败！\r\n错误原因：'+info.message);
 				}
@@ -746,6 +756,7 @@
 					if (start < total - 10) {
 						if (pageNo > half) {
 							if (newStart <= total - 5) {
+								newStart = Math.max(1, newStart);
 								fixPagerRange(newStart, totalPages, $pager);
 							}
 						} else if (pageNo <= half){
@@ -782,6 +793,7 @@
 		}
 
 		pageHtml.push('<li class="prev"><a href="#">&laquo;</a></li>');
+		console.log(start, end);
 		for (var i = start; i <= end; i++) {
 			pageHtml.push('<li><a href="#">'+ i +'</a></li>');
 		}
